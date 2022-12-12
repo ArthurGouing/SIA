@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #include "mainwidget.h"
+#include "joint.h"
 
 #include <QMouseEvent>
 
@@ -100,6 +101,10 @@ void MainWidget::initializeGL()
 //! [2]
 
     geometries = new GeometryEngine;
+
+    // Initialize Joint
+    std::string file = "walk1.bvh";
+    Joint* walk =  Joint::createFromFile(file);
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);

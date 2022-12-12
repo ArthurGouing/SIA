@@ -7,6 +7,7 @@
 
 #ifndef QT_NO_OPENGL
 #include "mainwidget.h"
+#include "joint.h"
 #endif
 
 int main(int argc, char *argv[])

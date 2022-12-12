@@ -46,7 +46,6 @@ void GeometryEngine::initCubeGeometry(float size)
         {QVector3D( size, -size,  -1.5f), QVector2D(tex_size, 0.0f)},  // v1
         {QVector3D(-size,  size,  -1.5f), QVector2D(0.0f, tex_size)},  // v2
         {QVector3D( size,  size,  -1.5f), QVector2D(tex_size, tex_size)}   // v3
-
     };
 
     // Indices for drawing cube faces using triangle strips.
@@ -57,7 +56,7 @@ void GeometryEngine::initCubeGeometry(float size)
     // connecting strips have same vertex order then only last
     // index of the first strip needs to be duplicated.
     GLushort indices[] = {
-         0,  1,  2,  3,  3     // Face 0 - triangle strip ( v0,  v1,  v2,  v3)
+         0,  1,  3,  2, 
     };
 
 //! [1]
@@ -95,7 +94,6 @@ void GeometryEngine::drawCubeGeometry(QOpenGLShaderProgram *program)
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_QUADS, 34, GL_UNSIGNED_SHORT, nullptr);
 }
 //! [2]
-
