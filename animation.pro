@@ -1,6 +1,6 @@
 QT += core gui widgets opengl 
 
-TARGET = cube
+TARGET = run
 TEMPLATE = app
 
 SOURCES += main.cpp
