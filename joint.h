@@ -1,5 +1,5 @@
-#ifndef _JOINT_H_
-#define _JOINT_H_
+#ifndef JOINT_H
+#define JOINT_H
 
 #include <string>
 #include <vector>
@@ -10,12 +10,11 @@
 class AnimCurve {
 public :
 	AnimCurve() {};
-	~AnimCurve() {
-		_values.clear();
-	}
+	~AnimCurve() {_values.clear();}
 public :
-	std::string name;					// name of dof
-	std::vector<double> _values;		// different keyframes = animation curve
+	std::string  name;		// name of dof
+	std::vector<double> _values;		// different keyframes = animation curve _values.size() = nb_frame
+						// cf. animate in joint.cpp
 };
 
 
@@ -69,7 +68,11 @@ public :
 	// Load from file (.bvh) :	
 	static Joint* createFromFile(std::string fileName);
 
+
 	void animate(int iframe=0);
+	
+	// Init dof values when reading bvh file
+	void init_dof(std::ifstream& inputfile, int iframe);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
