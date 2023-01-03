@@ -20,9 +20,6 @@ int main(int argc, char *argv[])
 
     app.setApplicationName("cube");
     app.setApplicationVersion("0.1");
-    std::string file = "walk1.bvh";
-    Joint* test =  Joint::createFromFile(file);
-    return 0;
 #ifndef QT_NO_OPENGL
     MainWidget widget;
     widget.show();

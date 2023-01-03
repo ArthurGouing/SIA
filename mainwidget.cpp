@@ -82,6 +82,10 @@ void MainWidget::initializeGL()
 
     geometries = new GeometryEngine;
 
+    // Initialize Joint
+    std::string file = "walk1.bvh";
+    Joint* walk =  Joint::createFromFile(file);
+
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);
 }
