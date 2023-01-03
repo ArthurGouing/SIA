@@ -7,7 +7,11 @@
 #include <QMouseEvent>
 
 #include <cmath>
+#include <iostream>
 
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.)
+{
+}
 MainWidget::~MainWidget()
 {
     // Make sure the context is current when deleting the texture
@@ -19,6 +23,10 @@ MainWidget::~MainWidget()
 }
 
 //! [0]
+void MainWidget::keyPressEvent(QKeyEvent *e)
+{
+}
+
 void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
@@ -60,40 +68,16 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-    // Mouse release position - mouse press position
-    QVector2D diff = QVector2D(e->pos()) - mousePressPosition;
-
-    // Rotation axis is perpendicular to the mouse position difference
-    // vector
-    QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
-
-    // Accelerate angular speed relative to the length of the mouse sweep
-    qreal acc = diff.length() / 100.0;
-
-    // Calculate new rotation axis as weighted sum
-    rotationAxis = (rotationAxis * angularSpeed + n * acc).normalized();
-
-    // Increase angular speed
-    angularSpeed += acc;
+    // A enlever
+    std::cout << "Mouse released" << std::endl;
 }
 //! [0]
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    // Decrease angular speed (friction)
-    angularSpeed *= 0.99;
-
-    // Stop rotation when speed goes below threshold
-    if (angularSpeed < 0.01) {
-        angularSpeed = 0.0;
-    } else {
-        // Update rotation
-        rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
-
-        // Request an update
-        update();
-    }
+    // Drag force    
+    angularSpeed *= 0.1;
 }
 //! [1]
 
@@ -149,7 +133,7 @@ void MainWidget::initShaders()
 void MainWidget::initTextures()
 {
     // Load cube.png image
-    texture = new QOpenGLTexture(QImage(":/cube.png").mirrored());
+    texture = new QOpenGLTexture(QImage(":/grid.png").mirrored());
 
     // Set nearest filtering mode for texture minification
     texture->setMinificationFilter(QOpenGLTexture::Nearest);
@@ -170,7 +154,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 3.0, zFar = 7.0, fov = 45.0;
+    const qreal zNear = 3.0, zFar = 17.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -190,7 +174,7 @@ void MainWidget::paintGL()
 //! [6]
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    matrix.translate(0.0, 0.0, -5.0);
+    matrix.translate(translation); //0.0, 0.0, -5.0);
     matrix.rotate(rotation);
 
     // Set modelview-projection matrix

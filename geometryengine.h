@@ -17,7 +17,7 @@ public:
     void drawCubeGeometry(QOpenGLShaderProgram *program);
 
 private:
-    void initCubeGeometry();
+    void initCubeGeometry(float size);
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;

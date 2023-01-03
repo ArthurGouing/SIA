@@ -22,11 +22,14 @@ class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Q_OBJECT
 
 public:
-    using QOpenGLWidget::QOpenGLWidget;
+    //using QOpenGLWidget::QOpenGLWidget;
+    MainWidget();
     ~MainWidget();
 
 protected:
+    void keyPressEvent(QKeyEvent *e) override;
     void mousePressEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
     void timerEvent(QTimerEvent *e) override;
 
@@ -45,11 +48,16 @@ private:
     QOpenGLTexture *texture = nullptr;
 
     QMatrix4x4 projection;
-
-    QVector2D mousePressPosition;
+    
+    float sensitivity;
+    bool shift_modifier;
+    Qt::MouseButton mouseButton;
+    QVector2D lastMousePosition;
+    QVector2D mousePosition;
     QVector3D rotationAxis;
     qreal angularSpeed = 0;
     QQuaternion rotation;
+    QVector3D translation;
 };
 
 #endif // MAINWIDGET_H
