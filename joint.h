@@ -65,6 +65,8 @@ public :
 		}
 		return child;
 	}
+	// Read dofs for each frame
+	void read_dof(std::ifstream& file, int iframe); 
 
 	// Load from file (.bvh) :	
 	static Joint* createFromFile(std::string fileName);

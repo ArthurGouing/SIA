@@ -28,11 +28,14 @@ void parse_channel(std::ifstream& file,
 		cout << "Parsing channels " << endl;
 		int num;
 		file >> num ;
+		joint->_dofs.resize(num); //
 		std :: string token;
 		int i = 0;
 		while( i < num){
 			file >> token ;
 			i++;
+			joint->_dofs[i].name = token; //
+			
 			if( token == kXpos || token == kYpos || token == kZpos){
 
 			}
@@ -151,21 +154,20 @@ Joint* parse_joint(std::ifstream& file,
 	
 }
 
-void Joint::init_dof(ifstream& input, int iframe)
+void Joint::read_dof(ifstream& file, int iframe)
 {
 	cout << "Core dumped root est un pointeur nul" <<endl;
 	for (unsigned int idof = 0 ; idof < _dofs.size() ; idof++) { // Pour chaque dofs
 		cout << "idof : "<< idof << endl;
-		cout << "Core dumped car _dofs n'est pas encore pars" <<endl;
 		cout << "name : " << _dofs[idof].name << endl;
 		double dof_value;
-		input >> dof_value;
+		file >> dof_value;
 		_dofs[idof]._values.push_back(dof_value);
 		cout << "We set "<< _dofs[idof].name << " of " << _name << " at " << dof_value << endl;
 
 	}
 	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
-		_children[ichild]->init_dof(input, iframe);
+		_children[ichild]->read_dof(file, iframe);
 	}
 
 }
@@ -173,6 +175,8 @@ void Joint::init_dof(ifstream& input, int iframe)
 
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
+	int nb_frames;
+	float frame_time; 
 	cout << "Loading from " << fileName << endl;
 
 	ifstream inputfile(fileName.data());
@@ -211,7 +215,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 				for (int frame=1; frame <= nb_frames; frame++) // Pour chaque ligne (ou frame)
 				{
 					cout << "frame : " <<frame<<endl;
-					root->init_dof(inputfile, frame);
+					root->read_dof(inputfile, frame);
 					inputfile.close();
 				}
 				inputfile.close();
