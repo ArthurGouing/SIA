@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 
 #include <cmath>
+#include <iostream>
 
 MainWidget::~MainWidget()
 {
@@ -21,45 +22,63 @@ MainWidget::~MainWidget()
 void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
-    mousePressPosition = QVector2D(e->pos());
+    lastMousePosition = QVector2D(e->pos());
+}
+
+void MainWidget::mouseMoveEvent(QMouseEvent *e)
+{
+    // Get mouse position
+    mousePosition = QVector2D(e->pos());
+    QVector2D diff = mousePosition-lastMousePosition;
+
+    // Rotation axis is perpendicular to the mouse position difference
+    QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
+    rotationAxis = n;
+    
+    // Update rotation
+    std::cout << diff.length() << std::endl;
+    rotation = QQuaternion::fromAxisAndAngle(rotationAxis, diff.length()) * rotation;
+    update();
+    lastMousePosition = mousePosition;
+
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-    // Mouse release position - mouse press position
-    QVector2D diff = QVector2D(e->pos()) - mousePressPosition;
 
-    // Rotation axis is perpendicular to the mouse position difference
-    // vector
-    QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
+    std::cout << "Mouse released" << std::endl;
+    //// Mouse release position - mouse press position
+    //QVector2D diff = QVector2D(e->pos()) - mousePressPosition;
 
-    // Accelerate angular speed relative to the length of the mouse sweep
-    qreal acc = diff.length() / 100.0;
 
-    // Calculate new rotation axis as weighted sum
-    rotationAxis = (rotationAxis * angularSpeed + n * acc).normalized();
+    //// Accelerate angular speed relative to the length of the mouse sweep
+    //qreal acc = diff.length() / 100.0;
 
-    // Increase angular speed
-    angularSpeed += acc;
+    //// Calculate new rotation axis as weighted sum
+    //rotationAxis = (rotationAxis * angularSpeed + n * acc).normalized();
+
+    //// Increase angular speed
+    //angularSpeed += acc;
 }
 //! [0]
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    // Decrease angular speed (friction)
-    angularSpeed *= 0.99;
+    
+    //// Decrease angular speed (friction)
+    angularSpeed *= 0.1;
 
-    // Stop rotation when speed goes below threshold
-    if (angularSpeed < 0.01) {
-        angularSpeed = 0.0;
-    } else {
-        // Update rotation
-        rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
+    //// Stop rotation when speed goes below threshold
+    //if (angularSpeed < 0.01) {
+    //    angularSpeed = 0.0;
+    //} else {
+    //    // Update rotation
+    //    rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
 
-        // Request an update
-        update();
-    }
+    //    // Request an update
+    //    update();
+    //}
 }
 //! [1]
 
