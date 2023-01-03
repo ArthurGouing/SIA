@@ -151,6 +151,26 @@ Joint* parse_joint(std::ifstream& file,
 	
 }
 
+void Joint::init_dof(ifstream& input, int iframe)
+{
+	cout << "Core dumped root est un pointeur nul" <<endl;
+	for (unsigned int idof = 0 ; idof < _dofs.size() ; idof++) { // Pour chaque dofs
+		cout << "idof : "<< idof << endl;
+		cout << "Core dumped car _dofs n'est pas encore pars" <<endl;
+		cout << "name : " << _dofs[idof].name << endl;
+		double dof_value;
+		input >> dof_value;
+		_dofs[idof]._values.push_back(dof_value);
+		cout << "We set "<< _dofs[idof].name << " of " << _name << " at " << dof_value << endl;
+
+	}
+	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
+		_children[ichild]->init_dof(input, iframe);
+	}
+
+}
+
+
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
 	cout << "Loading from " << fileName << endl;
@@ -160,7 +180,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 		while(!inputfile.eof()) {
 			string buf;	
 			inputfile >> buf;
-			// TODO : construire la structure de donn�es root � partir du fichier
+			// Construire la structure de donn�es root � partir du fichier
 			if( buf == kHierarchy){
 				if(inputfile.good() ){
 					inputfile >> buf;
@@ -177,6 +197,26 @@ Joint* Joint::createFromFile(std::string fileName) {
 				std::cerr << "Bad structure of bvh file "<< std::endl;
 				fflush(stdout);
 			}
+		 	// Stock les valeurs pour chaque keyframe
+			cout << buf << endl;
+			if (!buf.compare("MOTION")) {
+				//inputfile;
+				inputfile >> buf;
+				inputfile >> nb_frames;
+				inputfile >> buf;
+				inputfile >> frame_time;
+				cout << "There is "<< nb_frames << "frames." << endl;
+				cout << "The time of each frame is "<<frame_time<< "." << endl;
+				// init _dofs
+				for (int frame=1; frame <= nb_frames; frame++) // Pour chaque ligne (ou frame)
+				{
+					cout << "frame : " <<frame<<endl;
+					root->init_dof(inputfile, frame);
+					inputfile.close();
+				}
+				inputfile.close();
+			}
+
 		}
 		inputfile.close();
 	} else {
