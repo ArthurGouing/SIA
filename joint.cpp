@@ -1,38 +1,181 @@
-#include <QtGui/QMatrix4x4>
-#include <sstream>
 #include "joint.h"
+#include <QtGui/QMatrix4x4>
 
 using namespace std;
+namespace {
+
+const std::string kChannels = "CHANNELS";
+const std::string kEnd = "End";
+const std::string kEndSite = "End Site";
+const std::string kFrame = "Frame";
+const std::string kFrames = "Frames:";
+const std::string kHierarchy = "HIERARCHY";
+const std::string kJoint = "JOINT";
+const std::string kMotion = "MOTION";
+const std::string kOffset = "OFFSET";
+const std::string kRoot = "ROOT";
+
+const std::string kXpos = "Xposition";
+const std::string kYpos = "Yposition";
+const std::string kZpos = "Zposition";
+const std::string kXrot = "Xrotation";
+const std::string kYrot = "Yrotation";
+const std::string kZrot = "Zrotation";
+
+}
+void parse_channel(std::ifstream& file,
+    std::shared_ptr <Joint> joint){
+		cout << "Parsing channels " << endl;
+		int num;
+		file >> num ;
+		std :: string token;
+		int i = 0;
+		while( i < num){
+			file >> token ;
+			i++;
+			if( token == kXpos || token == kYpos || token == kZpos){
+
+			}
+			else if ( token == kZrot){
+				file >> token ;
+				if( token == kYrot){
+					joint->_rorder = roZYX ; 
+					break;
+				}
+				else if ( token == kXrot){
+					joint->_rorder = roZXY ;
+					break;
+				}
+				
+			}
+			else if ( token == kXrot){
+				file >> token ;
+				if( token == kYrot){
+					joint->_rorder = roXYZ ; 
+					break;
+				}
+				else if ( token == kZrot){
+					joint->_rorder = roXZY ;
+					break;
+				}
+				
+			}
+			else if ( token == kYrot){
+				file >> token ;
+				if( token == kXrot){
+					joint->_rorder = roYXZ ; 
+					break;
+				}
+				else if ( token == kZrot){
+					joint->_rorder = roYZX ;
+					break;
+				}
+				
+			}
+		}
+
+	}
+Joint* parse_joint(std::ifstream& file,
+    std::shared_ptr <Joint> parent, std::shared_ptr <Joint>& parsed){
+	cout << "Parsing joint " << fileName << endl;
+	std::shared_ptr<Joint> joint = std::make_shared<Joint>();
+	std::string name;
+	file >> name ;
+	joint->name = name;
+	std::string token ;
+	file >> token ; // consommer '{'
+	file >> token ; 
+	if( token == kOffset ){
+		double offX;
+		double offY;
+		double offZ;
+		file >> offX;
+		joint->_offX = offX;
+		file >> offY;
+		joint->_offY = offY;
+		file >> offZ;
+		joint->_offZ = offZ;
+		file >> token ;
+		if ( token == kChannels){
+			parse_channel(file,joint);
+			file >> token ;
+			while(file.good()){
+				if( token == kJoint){
+					std::shared_ptr <Joint> child;
+					child = parse_joint(file , joint , child);
+					joint->_children.push_back(child);
+			    }
+			    else if( token = kEnd) {
+				  std::string name_end ;
+				  file >> name_end ;
+				  file >> token; 
+				  std::shared_ptr <Joint> end_joint = std::make_shared <Joint> ();
+				  end_joint->name = name_end;
+				  joint->_children.push_back(end_joint);
+				  file >> token ; 
+				  if ( token == kOffset){
+					double offX;
+					double offY;
+					double offZ;
+					file >> offX;
+					end_joint->_offX = offX;
+					file >> offY;
+					end_joint->_offY = offY;
+					file >> offZ;
+					end_joint->_offZ = offZ;
+					file >> token ;
+
+				  }
+
+
+			    }
+				else if ( token == "}"){
+					parsed = joint ;
+					return parsed ;
+				}
+			}
+			
+			
+
+			
+		}
+		else{
+			std::cerr << "Bad structure of bvh file "<< std::endl;
+			return parsed;
+		}
+		
+	}else{
+		std::cerr << "Bad structure of bvh file "<< std::endl;
+		return parsed ;
+	}
+	
+}
 
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
 	cout << "Loading from " << fileName << endl;
 
 	ifstream inputfile(fileName.data());
-	int nb_frames;
-	float frame_time;
 	if(inputfile.good()) {
 		while(!inputfile.eof()) {
 			string buf;	
 			inputfile >> buf;
-			// TODO : construire la structure de données root à partir du fichier
-			// TODO : fill Anim curve for each fram
-			cout << buf << endl;
-			if (!buf.compare("MOTION")) {
-				//inputfile;
-				inputfile >> buf;
-				inputfile >> nb_frames;
-				inputfile >> buf;
-				inputfile >> frame_time;
-				cout << "There is "<< nb_frames << "frames." << endl;
-				cout << "The time of each frame is "<<frame_time<< "." << endl;
-				for (int frame=1; frame <= nb_frames; frame++) // Pour chaque ligne (ou frame)
-				{
-					cout << "frame : " <<frame<<endl;
-					root->init_dof(inputfile, frame);
-					inputfile.close();
+			// TODO : construire la structure de donnï¿½es root ï¿½ partir du fichier
+			if( buf == kHierarchy){
+				if(inputfile.good() ){
+					inputfile >> buf;
+					if( buf == kRoot){
+						root = parse_joint(inputfile, nullptr, root );
+					}
+					else{
+						std::cerr << "Bad structure of bvh file "<< std::endl;
+						fflush(stdout);
+					}
 				}
-				inputfile.close();
+			}
+			else{
+				std::cerr << "Bad structure of bvh file "<< std::endl;
+				fflush(stdout);
 			}
 		}
 		inputfile.close();
@@ -44,25 +187,6 @@ Joint* Joint::createFromFile(std::string fileName) {
 	cout << "file loaded" << endl;
 
 	return root;
-}
-
-void Joint::init_dof(ifstream& input, int iframe)
-{
-	cout << "Core dumped root est un pointeur nul" <<endl;
-	for (unsigned int idof = 0 ; idof < _dofs.size() ; idof++) { // Pour chaque dofs
-		cout << "idof : "<< idof << endl;
-		cout << "Core dumped car _dofs n'est pas encore parsé" <<endl;
-		cout << "name : " << _dofs[idof].name << endl;
-		double dof_value;
-		input >> dof_value;
-		_dofs[idof]._values.push_back(dof_value);
-		cout << "We set "<< _dofs[idof].name << " of " << _name << " at " << dof_value << endl;
-
-	}
-	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
-		_children[ichild]->init_dof(input, iframe);
-	}
-	
 }
 
 void Joint::animate(int iframe) 
@@ -93,14 +217,6 @@ void Joint::nbDofs() {
 	int nbDofsR = -1;
 
 	// TODO :
-	for (unsigned int idof=0 ; idof < _dofs.size() ; idof++) {
-		for (unsigned int frame=0 ; frame < _dofs[idof]._values.size()-1 ; frame++) {
-			if ((!_dofs[idof].name.compare("rotation")) 
-			& (abs(_dofs[idof]._values[frame]-_dofs[idof]._values[frame+1]) > tol)) { // si il y a roation dans le nom
-				nbDofsR += 1;
-			}
-		}
-	}
 	cout << _name << " : " << nbDofsR << " degree(s) of freedom in rotation\n";
 
 	// Propagate to children :
