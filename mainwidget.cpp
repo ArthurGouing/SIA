@@ -8,8 +8,9 @@
 #include <cmath>
 #include <iostream>
 
-MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0)
-{}
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.)
+{
+}
 MainWidget::~MainWidget()
 {
     // Make sure the context is current when deleting the texture
@@ -21,6 +22,10 @@ MainWidget::~MainWidget()
 }
 
 //! [0]
+void MainWidget::keyPressEvent(QKeyEvent *e)
+{
+}
+
 void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
@@ -34,7 +39,13 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
     mousePosition = QVector2D(e->pos());
     QVector2D diff = mousePosition-lastMousePosition;
 
-    if (mouseButton == Qt::LeftButton) {
+    // Get Modifiers
+    shift_modifier = false;
+    if (e->modifiers() & Qt::ShiftModifier) shift_modifier = true;
+    std::cout << "shift modifier : " << shift_modifier << std::endl;
+
+    // Apply transformations
+    if ((mouseButton == Qt::LeftButton)&(!shift_modifier)) {
         // Rotation axis is perpendicular to the mouse position difference
 	QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized() * sensitivity;
 	rotationAxis = n;
@@ -42,8 +53,12 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 	// Update rotation
 	rotation = QQuaternion::fromAxisAndAngle(rotationAxis, diff.length()) * rotation;
     }
-    if (mouseButton == Qt::RightButton) {
+    if ((mouseButton == Qt::RightButton) or ((mouseButton == Qt::LeftButton)&(shift_modifier))) {
 	// faire la translation
+	diff = 0.01*diff;
+	QVector3D move(diff.x(), -diff.y(), 0.);
+	translation += move;
+	std::cout << translation.y() << std::endl;
 	// cf. SI code
 	
     }
@@ -156,7 +171,7 @@ void MainWidget::paintGL()
 //! [6]
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    matrix.translate(0.0, 0.0, -5.0);
+    matrix.translate(translation); //0.0, 0.0, -5.0);
     matrix.rotate(rotation);
 
     // Set modelview-projection matrix
