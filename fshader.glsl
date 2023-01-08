@@ -5,7 +5,6 @@ precision mediump float;
 #endif
 
 uniform sampler2D texture;
-
 varying vec2 v_texcoord;
 
 //! [0]

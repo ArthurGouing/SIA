@@ -8,6 +8,8 @@
 #include <cmath>
 #include <iostream>
 
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0)
+{}
 MainWidget::~MainWidget()
 {
     // Make sure the context is current when deleting the texture
@@ -23,6 +25,7 @@ void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
     lastMousePosition = QVector2D(e->pos());
+    mouseButton = e->button(); // pour faire un mode translation
 }
 
 void MainWidget::mouseMoveEvent(QMouseEvent *e)
@@ -31,13 +34,19 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
     mousePosition = QVector2D(e->pos());
     QVector2D diff = mousePosition-lastMousePosition;
 
-    // Rotation axis is perpendicular to the mouse position difference
-    QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
-    rotationAxis = n;
-    
-    // Update rotation
-    std::cout << diff.length() << std::endl;
-    rotation = QQuaternion::fromAxisAndAngle(rotationAxis, diff.length()) * rotation;
+    if (mouseButton == Qt::LeftButton) {
+        // Rotation axis is perpendicular to the mouse position difference
+	QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized() * sensitivity;
+	rotationAxis = n;
+	
+	// Update rotation
+	rotation = QQuaternion::fromAxisAndAngle(rotationAxis, diff.length()) * rotation;
+    }
+    if (mouseButton == Qt::RightButton) {
+	// faire la translation
+	// cf. SI code
+	
+    }
     update();
     lastMousePosition = mousePosition;
 
@@ -45,40 +54,16 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-
+    // A enlever
     std::cout << "Mouse released" << std::endl;
-    //// Mouse release position - mouse press position
-    //QVector2D diff = QVector2D(e->pos()) - mousePressPosition;
-
-
-    //// Accelerate angular speed relative to the length of the mouse sweep
-    //qreal acc = diff.length() / 100.0;
-
-    //// Calculate new rotation axis as weighted sum
-    //rotationAxis = (rotationAxis * angularSpeed + n * acc).normalized();
-
-    //// Increase angular speed
-    //angularSpeed += acc;
 }
 //! [0]
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    
-    //// Decrease angular speed (friction)
+    // Drag force    
     angularSpeed *= 0.1;
-
-    //// Stop rotation when speed goes below threshold
-    //if (angularSpeed < 0.01) {
-    //    angularSpeed = 0.0;
-    //} else {
-    //    // Update rotation
-    //    rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
-
-    //    // Request an update
-    //    update();
-    //}
 }
 //! [1]
 
@@ -130,7 +115,7 @@ void MainWidget::initShaders()
 void MainWidget::initTextures()
 {
     // Load cube.png image
-    texture = new QOpenGLTexture(QImage(":/cube.png").mirrored());
+    texture = new QOpenGLTexture(QImage(":/grid.png").mirrored());
 
     // Set nearest filtering mode for texture minification
     texture->setMinificationFilter(QOpenGLTexture::Nearest);
@@ -151,7 +136,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 3.0, zFar = 7.0, fov = 45.0;
+    const qreal zNear = 3.0, zFar = 17.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();
