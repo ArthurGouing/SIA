@@ -16,7 +16,7 @@ public :
 	}
 public :
 	std::string name;					// name of dof
-	std::vector<double> _values;		// different keyframes = animation curve
+	std::vector<double> _values;		 		// different keyframes = animation curve
 };
 
 
@@ -70,7 +70,7 @@ public :
 	void read_dof(std::ifstream& file, int iframe); 
 
 	// Load from file (.bvh) :	
-	Joint* createFromFile(std::string fileName);
+	static Joint* createFromFile(std::string fileName);
 	
 
 	void animate(int iframe=0);
