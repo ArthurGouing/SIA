@@ -24,7 +24,7 @@ const std::string kZrot = "Zrotation";
 
 }
 void parse_channel(std::ifstream& file,
-    std::shared_ptr <Joint> joint){
+   Joint* joint){
 		cout << "Parsing channels " << endl;
 		int num;
 		file >> num ;
@@ -37,15 +37,17 @@ void parse_channel(std::ifstream& file,
 			joint->_dofs[i].name = token; //
 			
 			if( token == kXpos || token == kYpos || token == kZpos){
-
 			}
 			else if ( token == kZrot){
 				file >> token ;
+				i++;
 				if( token == kYrot){
+					file >> token ;
 					joint->_rorder = roZYX ; 
 					break;
 				}
 				else if ( token == kXrot){
+					file >> token ;
 					joint->_rorder = roZXY ;
 					break;
 				}
@@ -53,11 +55,14 @@ void parse_channel(std::ifstream& file,
 			}
 			else if ( token == kXrot){
 				file >> token ;
+				i++;
 				if( token == kYrot){
+					file >> token ;
 					joint->_rorder = roXYZ ; 
 					break;
 				}
 				else if ( token == kZrot){
+					file >> token ;
 					joint->_rorder = roXZY ;
 					break;
 				}
@@ -65,11 +70,14 @@ void parse_channel(std::ifstream& file,
 			}
 			else if ( token == kYrot){
 				file >> token ;
+				i++;
 				if( token == kXrot){
+					file >> token ;
 					joint->_rorder = roYXZ ; 
 					break;
 				}
 				else if ( token == kZrot){
+					file >> token ;
 					joint->_rorder = roYZX ;
 					break;
 				}
@@ -79,12 +87,13 @@ void parse_channel(std::ifstream& file,
 
 	}
 Joint* parse_joint(std::ifstream& file,
-    std::shared_ptr <Joint> parent, std::shared_ptr <Joint>& parsed){
-	cout << "Parsing joint " << fileName << endl;
-	std::shared_ptr<Joint> joint = std::make_shared<Joint>();
+    Joint* parent, Joint* parsed){
+	cout << "Parsing joint " <<  endl;
+	Joint* joint = new Joint();
 	std::string name;
 	file >> name ;
-	joint->name = name;
+	cout << name <<  endl;
+	joint->_name = name;
 	std::string token ;
 	file >> token ; // consommer '{'
 	file >> token ; 
@@ -99,58 +108,63 @@ Joint* parse_joint(std::ifstream& file,
 		file >> offZ;
 		joint->_offZ = offZ;
 		file >> token ;
-		if ( token == kChannels){
+		
+		
+	}
+	
+	if ( token == kChannels){
 			parse_channel(file,joint);
 			file >> token ;
-			while(file.good()){
-				if( token == kJoint){
-					std::shared_ptr <Joint> child;
-					child = parse_joint(file , joint , child);
-					joint->_children.push_back(child);
-			    }
-			    else if( token = kEnd) {
-				  std::string name_end ;
-				  file >> name_end ;
-				  file >> token; 
-				  std::shared_ptr <Joint> end_joint = std::make_shared <Joint> ();
-				  end_joint->name = name_end;
-				  joint->_children.push_back(end_joint);
-				  file >> token ; 
-				  if ( token == kOffset){
-					double offX;
-					double offY;
-					double offZ;
-					file >> offX;
-					end_joint->_offX = offX;
-					file >> offY;
-					end_joint->_offY = offY;
-					file >> offZ;
-					end_joint->_offZ = offZ;
-					file >> token ;
+			
 
-				  }
-
-
-			    }
-				else if ( token == "}"){
-					parsed = joint ;
-					return parsed ;
-				}
 			}
+	
+	while(file.good()){
+		if ( token == kMotion){
+			cout << "im here " <<  endl;
+			break;
 			
-			
+		}
+		if( token == kJoint){
+			Joint* child = new Joint();
+			child = parse_joint(file , joint , child);
+			joint->_children.push_back(child);
+		}
+		else if( token == kEnd) {
+			std::string name_end ;
+			file >> name_end ;
+			cout << name_end<<  endl;
+			file >> token; 
+			Joint* end_joint = new Joint();
+			end_joint->_name = name_end;
+			joint->_children.push_back(end_joint);
+			file >> token ; 
+			if ( token == kOffset){
+			double offX;
+			double offY;
+			double offZ;
+			file >> offX;
+			end_joint->_offX = offX;
+			file >> offY;
+			end_joint->_offY = offY;
+			file >> offZ;
+			end_joint->_offZ = offZ;
+			file >> token ;
+			}
 
+
+		}
+		else if ( token == "}"){
+			
 			
 		}
-		else{
-			std::cerr << "Bad structure of bvh file "<< std::endl;
-			return parsed;
-		}
+		file >> token;
 		
-	}else{
-		std::cerr << "Bad structure of bvh file "<< std::endl;
-		return parsed ;
 	}
+	parsed = joint ;	
+	return parsed;	
+		
+	
 	
 }
 
@@ -202,9 +216,15 @@ Joint* Joint::createFromFile(std::string fileName) {
 				fflush(stdout);
 			}
 		 	// Stock les valeurs pour chaque keyframe
-			cout << buf << endl;
+			inputfile >> buf;
+			std::string token;
+			inputfile >> token;
+
+			cout << token << endl;
 			if (!buf.compare("MOTION")) {
 				//inputfile;
+				int nb_frames =0;
+				float frame_time=0;
 				inputfile >> buf;
 				inputfile >> nb_frames;
 				inputfile >> buf;

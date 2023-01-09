@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 class AnimCurve {
 public :
@@ -69,16 +70,17 @@ public :
 	void read_dof(std::ifstream& file, int iframe); 
 
 	// Load from file (.bvh) :	
-	static Joint* createFromFile(std::string fileName);
+	Joint* createFromFile(std::string fileName);
 	
 
 	void animate(int iframe=0);
+	void init_dof(std::ifstream& input, int iframe);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
 };
-Joint*  parse_joint(std::ifstream& file);
-void parse_channel(std::ifstream& file,
-    std::shared_ptr <Joint> joint);
+Joint* parse_joint(std::ifstream& file,Joint* parent, Joint* parsed);
+void parse_channel(std::ifstream& file,Joint* joint);
+
 
 #endif
