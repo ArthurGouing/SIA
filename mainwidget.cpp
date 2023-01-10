@@ -57,15 +57,22 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
     if ((mouseButton == Qt::RightButton) or ((mouseButton == Qt::LeftButton)&(shift_modifier))) {
 	// faire la translation
 	diff = 0.01*diff;
-	QVector3D move(diff.x(), -diff.y(), 0.);
+	QVector3D move(diff.x(), 0, -diff.y());
 	translation += move;
-	std::cout << translation.y() << std::endl;
 	// cf. SI code
 	
     }
     update();
     lastMousePosition = mousePosition;
 
+}
+
+void MainWidget::wheelEvent(QWheelEvent *ev)
+{
+    QPoint zoom = ev->angleDelta();
+    QVector3D move(0., 0., -0.01*zoom.y());
+    translation += move;
+    update();
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)

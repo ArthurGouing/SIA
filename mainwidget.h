@@ -27,15 +27,16 @@ public:
     ~MainWidget();
 
 protected:
-    void keyPressEvent(QKeyEvent *e) override;
-    void mousePressEvent(QMouseEvent *e) override;
-    void mouseMoveEvent(QMouseEvent *e) override;
+    void keyPressEvent(QKeyEvent *e)       override;
+    void mousePressEvent(QMouseEvent *e)   override;
+    void mouseMoveEvent(QMouseEvent *e)    override;
+    void wheelEvent(QWheelEvent *ev)       override;
     void mouseReleaseEvent(QMouseEvent *e) override;
-    void timerEvent(QTimerEvent *e) override;
+    void timerEvent(QTimerEvent *e)        override;
 
-    void initializeGL() override;
+    void initializeGL()         override;
     void resizeGL(int w, int h) override;
-    void paintGL() override;
+    void paintGL()              override;
 
     void initShaders();
     void initTextures();
@@ -54,6 +55,7 @@ private:
     Qt::MouseButton mouseButton;
     QVector2D lastMousePosition;
     QVector2D mousePosition;
+    QPoint zoom;
     QVector3D rotationAxis;
     qreal angularSpeed = 0;
     QQuaternion rotation;
