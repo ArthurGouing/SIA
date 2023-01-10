@@ -23,6 +23,60 @@ const std::string kYrot = "Yrotation";
 const std::string kZrot = "Zrotation";
 
 }
+
+QVector4D Joint::getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransformation) {
+
+    // create LOCAL 4x4 rotation matrix transformation for the Joint (Only the 3x3 upper matrix is filled)
+    QMatrix4x4 localTransformation = QMatrix4x4(); // localTransformation initialized to Identity
+    switch (joint->_rorder) {
+        case roXYZ:
+            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            break;
+        case roYZX:
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
+            break;
+        case roZXY:
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            break;
+        case roXZY:
+            localTransformation.rotate((float) joint->_curRx, 1, 0, 1);
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            break;
+        case roYXZ:
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            break;
+        case roZYX:
+            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+            localTransformation.rotate((float) joint->_curRx, 0, 0, 0);
+            break;
+        default:
+            break;
+    }
+
+    // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
+    localTransformation.setColumn(3, QVector4D(
+            (float) joint->_offX,
+            (float) joint->_offY,
+            (float) joint->_offZ,
+            1));
+
+    // Calculate the global transformation matrix from the ROOT, the global position is the last column
+    QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
+
+    return childGlobalTransformation.column(3);
+}
+
+
 void parse_channel(std::ifstream& file,
    Joint* joint){
 		cout << "Parsing channels " << endl;
@@ -35,7 +89,7 @@ void parse_channel(std::ifstream& file,
 		int i = 0;
 		while( i < num){
 			file >> token ;
-			
+
 			if( token == kXpos || token == kYpos || token == kZpos){
 			        joint->_dofs[i].name = token; //
        				cout <<i<< "name : " << token << endl;
@@ -52,7 +106,7 @@ void parse_channel(std::ifstream& file,
 					file >> token ;
 			        	joint->_dofs[i+1].name = token; //
        					cout << "name : " << token << endl;
-					joint->_rorder = roZYX ; 
+					joint->_rorder = roZYX ;
 					break;
 				}
 				else if ( token == kXrot){
@@ -62,7 +116,7 @@ void parse_channel(std::ifstream& file,
 					joint->_rorder = roZXY ;
 					break;
 				}
-				
+
 			}
 			else if ( token == kXrot){
 			        joint->_dofs[i].name = token; //
@@ -72,7 +126,7 @@ void parse_channel(std::ifstream& file,
 			        	joint->_dofs[i].name = token; //
 					file >> token ;
 			        	joint->_dofs[i+1].name = token; //
-					joint->_rorder = roXYZ ; 
+					joint->_rorder = roXYZ ;
 					break;
 				}
 				else if ( token == kZrot){
@@ -82,7 +136,7 @@ void parse_channel(std::ifstream& file,
 					joint->_rorder = roXZY ;
 					break;
 				}
-				
+
 			}
 			else if ( token == kYrot){
 			        joint->_dofs[i].name = token; //
@@ -92,7 +146,7 @@ void parse_channel(std::ifstream& file,
 			        	joint->_dofs[i].name = token; //
 					file >> token ;
 			        	joint->_dofs[i+1].name = token; //
-					joint->_rorder = roYXZ ; 
+					joint->_rorder = roYXZ ;
 					break;
 				}
 				else if ( token == kZrot){
@@ -117,7 +171,7 @@ Joint* parse_joint(std::ifstream& file,
 	joint->_name = name;
 	std::string token ;
 	file >> token ; // consommer '{'
-	file >> token ; 
+	file >> token ;
 	if( token == kOffset ){
 		double offX;
 		double offY;
@@ -129,14 +183,14 @@ Joint* parse_joint(std::ifstream& file,
 		file >> offZ;
 		joint->_offZ = offZ;
 		file >> token ;
-		
-		
+
+
 	}
-	
+
 	if ( token == kChannels){
 			parse_channel(file,joint);
 			file >> token ;
-			
+
 
 			}
 	

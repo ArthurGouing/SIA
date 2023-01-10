@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <QVector4D>
 
 class AnimCurve {
 public :
@@ -78,6 +79,8 @@ public :
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
+
+    QVector4D getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransformation);
 };
 Joint* parse_joint(std::ifstream& file,Joint* parent, Joint* parsed);
 void parse_channel(std::ifstream& file,Joint* joint);
