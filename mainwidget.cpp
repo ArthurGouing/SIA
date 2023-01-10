@@ -106,6 +106,7 @@ void MainWidget::timerEvent(QTimerEvent *)
 {
     // Drag force    
     angularSpeed *= 0.1;
+    update();
 }
 //! [1]
 
