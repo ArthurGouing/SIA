@@ -16,7 +16,8 @@ qt_standard_project_setup()
 
 qt_add_executable(cube
     geometryengine.cpp geometryengine.h
-    main.cpp
+    joint.cpp joint.h
+        main.cpp
     mainwidget.cpp mainwidget.h
 )
 

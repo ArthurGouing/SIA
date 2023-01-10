@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <QtGui/QMatrix4x4>
+
 
 class AnimCurve {
 public :
@@ -71,7 +73,8 @@ public :
 
 	// Load from file (.bvh) :	
 	Joint* createFromFile(std::string fileName);
-	
+
+    QVector4D getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransformation);
 
 	void animate(int iframe=0);
 	void init_dof(std::ifstream& input, int iframe);
