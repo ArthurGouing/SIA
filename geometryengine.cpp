@@ -14,8 +14,8 @@ struct VertexData
 };
 
 //! [0]
-GeometryEngine::GeometryEngine()
-    : indexBuf(QOpenGLBuffer::IndexBuffer), is_loop(true)
+GeometryEngine::GeometryEngine(bool* looping, bool* animating)
+    : indexBuf(QOpenGLBuffer::IndexBuffer), is_loop(looping), is_animated(animating)
 {
     initializeOpenGLFunctions();
 
@@ -133,11 +133,11 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     indexBuf.bind();
 
     // Update frame
-    if (frame <= root->nb_frames) // faire cette attrbcut
+    if ((frame <= root->nb_frames)&(*is_animated)) // faire cette attrbcut
     {
     	frame++;
     }
-    else if (is_loop) { 
+    if ((frame>root->nb_frames)&(*is_loop)) { 
 	frame = 0;
     }
 

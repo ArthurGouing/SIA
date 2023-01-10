@@ -53,6 +53,8 @@ private:
     
     float sensitivity;
     bool shift_modifier;
+    bool _animating;
+    bool _looping;
     Qt::MouseButton mouseButton;
     QVector2D lastMousePosition;
     QVector2D mousePosition;

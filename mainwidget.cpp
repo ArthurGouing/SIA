@@ -9,7 +9,7 @@
 #include <cmath>
 #include <iostream>
 
-MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.)
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.), _animating(true), _looping(true)
 {
 }
 MainWidget::~MainWidget()
@@ -23,8 +23,28 @@ MainWidget::~MainWidget()
 }
 
 //! [0]
-void MainWidget::keyPressEvent(QKeyEvent *e)
+void MainWidget::keyPressEvent(QKeyEvent* e)
 {
+	int key = e->key();
+	switch (key)
+	{
+	case Qt::Key_Space:
+		_animating = !_animating;
+		if (_animating)
+		std::cout << "Space key pressed : animation play" << std::endl;
+		else
+		std::cout << "Space key pressed : animation paused" << std::endl;
+		break;
+        case Qt::Key_L:
+		_looping = !_looping;
+		if (_looping)
+		std::cout << "L key pressed : loop mode activated" << std::endl;
+		else
+		std::cout << "L key pressed : loop mode disabled" << std::endl;
+		break;
+	default:
+		break;
+	}
 }
 
 void MainWidget::mousePressEvent(QMouseEvent *e)
@@ -98,7 +118,7 @@ void MainWidget::initializeGL()
     glEnable(GL_CULL_FACE);
 //! [2]
 
-    geometries = new GeometryEngine;
+    geometries = new GeometryEngine(&_looping, &_animating);
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(12, this);

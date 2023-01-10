@@ -13,7 +13,7 @@
 class GeometryEngine : protected QOpenGLFunctions
 {
 public:
-    GeometryEngine();
+    GeometryEngine(bool* looping, bool* animating);
     virtual ~GeometryEngine();
 
     void drawSkeletonGeometry(QOpenGLShaderProgram *program);
@@ -23,7 +23,8 @@ private:
 
     Joint* root;
     int frame;
-    bool is_loop;
+    bool* is_loop;
+    bool* is_animated;
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
