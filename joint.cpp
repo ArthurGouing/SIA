@@ -79,80 +79,72 @@ QVector4D Joint::getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransfor
 
 void parse_channel(std::ifstream& file,
    Joint* joint){
-		cout << "Parsing channels " << endl;
 		int num;
 		file >> num ;
-		joint->_dofs.resize(num); //
-		cout << "  joint " << joint->_name << endl;
-    		cout << "  dofs size : " << joint->_dofs.size() << endl;
+		joint->_dofs.resize(num); 
 		std :: string token;
 		int i = 0;
 		while( i < num){
 			file >> token ;
 
 			if( token == kXpos || token == kYpos || token == kZpos){
-			        joint->_dofs[i].name = token; //
-       				cout <<i<< "name : " << token << endl;
-				//i++;
+			        joint->_dofs[i].name = token; 
 			}
 			else if ( token == kZrot){
-			        joint->_dofs[i].name = token; //
-       				cout <<i<< "name : " << token << endl;
+			        joint->_dofs[i].name = token; 
 				file >> token ;
 				i++;
 				if( token == kYrot){
-			        	joint->_dofs[i].name = token; //
-       					cout <<i<< "name : " << token << endl;
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
-       					cout << "name : " << token << endl;
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roZYX ;
 					break;
 				}
 				else if ( token == kXrot){
-			        	joint->_dofs[i].name = token; //
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roZXY ;
 					break;
 				}
 
 			}
 			else if ( token == kXrot){
-			        joint->_dofs[i].name = token; //
+			        joint->_dofs[i].name = token; 
 				file >> token ;
 				i++;
 				if( token == kYrot){
-			        	joint->_dofs[i].name = token; //
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roXYZ ;
 					break;
 				}
 				else if ( token == kZrot){
-			        	joint->_dofs[i].name = token; //
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roXZY ;
 					break;
 				}
 
 			}
 			else if ( token == kYrot){
-			        joint->_dofs[i].name = token; //
+			        joint->_dofs[i].name = token; 
 				file >> token ;
 				i++;
 				if( token == kXrot){
-			        	joint->_dofs[i].name = token; //
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roYXZ ;
 					break;
 				}
 				else if ( token == kZrot){
-			        	joint->_dofs[i].name = token; //
+			        	joint->_dofs[i].name = token; 
 					file >> token ;
-			        	joint->_dofs[i+1].name = token; //
+			        	joint->_dofs[i+1].name = token; 
 					joint->_rorder = roYZX ;
 					break;
 				}
@@ -163,11 +155,10 @@ void parse_channel(std::ifstream& file,
 	}
 Joint* parse_joint(std::ifstream& file,
     Joint* parent, Joint* parsed){
-	cout << "Parsing joint " <<  endl;
 	Joint* joint = new Joint();
 	std::string name;
 	file >> name ;
-	cout << name <<  endl;
+	if (verbose) cout << "Parsing joint : " << name << endl;
 	joint->_name = name;
 	std::string token ;
 	file >> token ; // consommer '{'
@@ -196,7 +187,6 @@ Joint* parse_joint(std::ifstream& file,
 	
 	while(file.good()){
 		if ( token == kMotion){
-			//cout << "im here " <<  endl;
 			break;
 			
 		}
@@ -208,7 +198,7 @@ Joint* parse_joint(std::ifstream& file,
 		else if( token == kEnd) {
 			std::string name_end ;
 			file >> name_end ;
-			cout << name_end<<  endl;
+			if (verbose) cout << name_end<<  endl;
 			file >> token; 
 			Joint* end_joint = new Joint();
 			end_joint->_name = name_end;
@@ -247,15 +237,11 @@ Joint* parse_joint(std::ifstream& file,
 
 void Joint::read_dof(ifstream& file, int iframe)
 {
-	cout << "joint "<< _name << endl;
-        cout << "dof size : " << _dofs.size() << endl;
 	for (unsigned int idof = 0 ; idof < _dofs.size() ; idof++) { // Pour chaque dofs
-		cout << "idof : "<< idof << endl;
-		cout << "name : " << _dofs[idof].name << endl;
 		double dof_value;
 		file >> dof_value;
 		_dofs[idof]._values.push_back(dof_value);
-		cout << "We set "<< _dofs[idof].name << " of " << _name << " at " << dof_value << endl;
+		if ((iframe==1)&(verbose)) cout << "We set "<< _dofs[idof].name << " of " << _name << " at " << dof_value << endl;
 
 	}
 	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
@@ -269,25 +255,27 @@ void parse_frames(std::ifstream& file, Joint* root)
 
         std:string token;
 	file >> token;
+	// place cursor at MOTION
 	while (token != kMotion)
 	{ 
 		file >> token;
-		cout << token << endl;
 	}
-	//inputfile;
 	file >> token;
-	cout << token << endl;
 	file >> root->nb_frames;
 	file >> token;
 	file >> token;
 	file >> root->frame_time;
-	cout << endl << "There is "<< root->nb_frames << "frames." << endl;
-	cout << "The time of each frame is "<< root->frame_time<< "." << endl;
-	// init _dofs
+	if (verbose) 
+	{
+	    cout << endl << "There is "<< root->nb_frames << "frames." << endl;
+	    cout << "The time of each frame is "<< root->frame_time<< "." << endl << endl;
+	}
+	// Set dofs
 	for (int frame=1; frame <= root->nb_frames; frame++) // Pour chaque ligne (ou frame)
 	{
-		cout << "frame : " <<frame<<endl;
+		if ((frame==1)&(verbose)) cout << "Frame : " <<frame<<endl;
 		root->read_dof(file, frame);
+         	if ((frame==1)&(verbose)) cout << "Frame : 2 \netc ..." << endl;
 	}  
 	return;
 }
@@ -295,7 +283,7 @@ void parse_frames(std::ifstream& file, Joint* root)
 
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
-	cout << "Loading from " << fileName << endl;
+	if (verbose) cout << "Loading from " << fileName << endl;
 
 	ifstream inputfile(fileName.data());
 	ifstream file(fileName.data());
@@ -303,7 +291,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 		while(!inputfile.eof()) {
 			string buf;	
 			inputfile >> buf;
-			cout << "Parsing" << endl;
+			if (verbose) cout << "Parsing" << endl;
 			// Construire la structure de donn�es root partir du fichier
 			if( buf == kHierarchy){
 				if(inputfile.good() ){
@@ -322,16 +310,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 				std::cerr << "Bad structure of bvh file "<< std::endl;
 				fflush(stdout);
 			}
-			cout << "Fin du parsing" << endl;
-		 	// Stock les valeurs pour chaque keyframe
-			cout << "toke : " << buf << endl;
-			std::string token;
-			inputfile >> token;
-
-			cout << token << endl;
-			if (!buf.compare("MOTION")) {
-			}
-
+			if (verbose) cout << "Fin du parsing" << endl << endl;
 		}
 		inputfile.close();
 	} else {
@@ -339,7 +318,7 @@ Joint* Joint::createFromFile(std::string fileName) {
 		fflush(stdout);
 	}
 
-	cout << "file loaded" << endl;
+	cout << "File loaded" << endl;
 
 	return root;
 }

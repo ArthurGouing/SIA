@@ -10,12 +10,15 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 
+extern bool verbose;
+
 class GeometryEngine : protected QOpenGLFunctions
 {
 public:
     GeometryEngine(bool* looping, bool* animating);
     virtual ~GeometryEngine();
 
+    float get_delta_time(){return root->frame_time;}
     void drawSkeletonGeometry(QOpenGLShaderProgram *program);
 
 private:

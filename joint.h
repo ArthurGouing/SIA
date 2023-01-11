@@ -9,6 +9,9 @@
 #include <memory>
 #include <QVector4D>
 
+
+extern bool verbose;
+
 class AnimCurve {
 public :
 	AnimCurve() {};

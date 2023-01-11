@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #include "mainwidget.h"
-#include "joint.h"
 
 #include <QMouseEvent>
 
 #include <cmath>
 #include <iostream>
 
-MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.), _animating(true), _looping(true)
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -5.), _animating(true), _looping(true)//, timer(this)
 {
 }
 MainWidget::~MainWidget()
@@ -30,16 +29,16 @@ void MainWidget::keyPressEvent(QKeyEvent* e)
 	{
 	case Qt::Key_Space:
 		_animating = !_animating;
-		if (_animating)
+		if ((_animating)&(verbose))
 		std::cout << "Space key pressed : animation play" << std::endl;
-		else
+		else if (verbose)
 		std::cout << "Space key pressed : animation paused" << std::endl;
 		break;
         case Qt::Key_L:
 		_looping = !_looping;
-		if (_looping)
+		if ((_looping)&(verbose))
 		std::cout << "L key pressed : loop mode activated" << std::endl;
-		else
+		else if(verbose)
 		std::cout << "L key pressed : loop mode disabled" << std::endl;
 		break;
 	default:
@@ -78,10 +77,11 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 	diff = 0.01*diff;
 	QVector3D move(diff.x(), 0, -diff.y());
 	translation += move;
+        update();
 	// cf. SI code
 	
     }
-    update();
+    //update();
     lastMousePosition = mousePosition;
 
 }
@@ -97,20 +97,20 @@ void MainWidget::wheelEvent(QWheelEvent *ev)
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 {
     // A enlever
-    std::cout << "Mouse released" << std::endl;
+    if (verbose) std::cout << "Mouse released" << std::endl;
 }
 //! [0]
-
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
     // Drag force    
     angularSpeed *= 0.1;
+    //std::cout << timer.interval() << std::endl;
     update();
 }
 //! [1]
 
-void MainWidget::initializeGL()
+void MainWidget::initializeGL() 
 {
     initializeOpenGLFunctions();
 
@@ -128,9 +128,11 @@ void MainWidget::initializeGL()
 //! [2]
 
     geometries = new GeometryEngine(&_looping, &_animating);
+    delta_time = geometries->get_delta_time();
+    std::cout <<"dt : "<<delta_time<<std::endl;
 
-    // Use QBasicTimer because its faster than QTimer
-    timer.start(12, this);
+    //// Use QBasicTimer because its faster than QTimer
+    timer.start(delta_time*1000, this);
 }
 
 //! [3]
@@ -179,7 +181,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 3.0, zFar = 17.0, fov = 45.0;
+    const qreal zNear = 1.0, zFar = 17.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();

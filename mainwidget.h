@@ -5,16 +5,17 @@
 #define MAINWIDGET_H
 
 #include "geometryengine.h"
-#include "joint.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 #include <QQuaternion>
 #include <QVector2D>
-#include <QBasicTimer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
+#include <QBasicTimer>
+
+extern bool verbose;
 
 class GeometryEngine;
 
@@ -43,27 +44,28 @@ protected:
     void initTextures();
 
 private:
-    QBasicTimer timer;
     QOpenGLShaderProgram program;
     GeometryEngine *geometries = nullptr;
-
+    QBasicTimer timer;
+    float delta_time;
 
     QOpenGLTexture *texture = nullptr;
 
-    QMatrix4x4 projection;
-    
     float sensitivity;
+    QMatrix4x4 projection;
+    qreal angularSpeed = 0;
+    QVector3D rotationAxis;
+    QQuaternion rotation;
+    QVector3D translation;
+    
+    Qt::MouseButton mouseButton;
     bool shift_modifier;
+
     bool _animating;
     bool _looping;
-    Qt::MouseButton mouseButton;
     QVector2D lastMousePosition;
     QVector2D mousePosition;
     QPoint zoom;
-    QVector3D rotationAxis;
-    qreal angularSpeed = 0;
-    QQuaternion rotation;
-    QVector3D translation;
 };
 
 #endif // MAINWIDGET_H
