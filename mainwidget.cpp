@@ -22,7 +22,40 @@ MainWidget::~MainWidget()
 void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
-    mousePressPosition = QVector2D(e->pos());
+    lastMousePosition = QVector2D(e->pos());
+    mouseButton = e->button(); // pour faire un mode translation
+}
+
+void MainWidget::mouseMoveEvent(QMouseEvent *e)
+{
+    // Get mouse position
+    mousePosition = QVector2D(e->pos());
+    QVector2D diff = mousePosition-lastMousePosition;
+
+    // Get Modifiers
+    shift_modifier = false;
+    if (e->modifiers() & Qt::ShiftModifier) shift_modifier = true;
+
+    // Apply transformations
+    if ((mouseButton == Qt::LeftButton)&(!shift_modifier)) {
+        // Rotation axis is perpendicular to the mouse position difference
+	QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized() * sensitivity;
+	rotationAxis = n;
+	
+	// Update rotation
+	rotation = QQuaternion::fromAxisAndAngle(rotationAxis, diff.length()) * rotation;
+    }
+    if ((mouseButton == Qt::RightButton) or ((mouseButton == Qt::LeftButton)&(shift_modifier))) {
+	// faire la translation
+	diff = 0.01*diff;
+	QVector3D move(diff.x(), -diff.y(), 0.);
+	translation += move;
+	// cf. SI code
+	
+    }
+    update();
+    lastMousePosition = mousePosition;
+
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)

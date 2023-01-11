@@ -40,118 +40,84 @@ void GeometryEngine::initCubeGeometry()
     // duplicate vertex for each face because texture coordinate
     // is different.
     QVector3D vertices[] = {
-	QVector3D(-0.0f, -0.0f,  0.0f), // root
-	QVector3D(-1.0f, -0.0f,  0.0f), // left leg
-	QVector3D(-1.0f, -1.0f,  0.0f),
-	QVector3D(-1.0f, -2.0f,  0.0f),
-	QVector3D(-1.0f, -3.0f,  0.0f),
-	QVector3D(-1.0f, -4.0f,  0.0f),
-	QVector3D(-1.0f, -5.0f,  0.0f),
-	QVector3D(1.0f, -0.0f,  0.0f),  // right leg
-	QVector3D(1.0f, -1.0f,  0.0f),
-	QVector3D(1.0f, -2.0f,  0.0f),
-	QVector3D(1.0f, -3.0f,  0.0f),
-	QVector3D(1.0f, -4.0f,  0.0f),
-	QVector3D(1.0f, -5.0f,  0.0f),
-	QVector3D(-0.0f, 1.f,  0.0f),  // spine
-	QVector3D(-0.0f, 2.f,  0.0f),
-	QVector3D(-0.0f, 3.f,  0.0f),
-	QVector3D(-0.0f, 4.f,  0.0f),  // mid
-	QVector3D(-0.0f, 5.f,  0.0f),  // head
-	QVector3D(-0.0f, 6.f,  0.0f),
-	QVector3D(-0.0f, 7.f,  0.0f),
-	QVector3D(-1.0f, 4.f,  0.0f),  // left hand
-	QVector3D(-2.0f, 4.f,  0.0f),  
-	QVector3D(-3.0f, 4.f,  0.0f),  
-	QVector3D(-4.0f, 4.f,  0.0f),  
-	QVector3D(1.0f, 4.f,  0.0f) , // right hand
-	QVector3D(2.0f, 4.f,  0.0f) , 
-	QVector3D(3.0f, 4.f,  0.0f) , 
-	QVector3D(4.0f, 4.f,  0.0f)  
+	QVector3D(-0.0f, -0.0f,  0.0f), //0 // root // Hips
+	QVector3D(-1.0f, -0.0f,  0.0f), //1 /       // l_hips
+	QVector3D(-1.0f, -1.0f,  0.0f), //2         // l_thig
+	QVector3D(-1.0f, -2.0f,  0.0f), //3         // l_knee
+	QVector3D(-1.0f, -3.0f,  0.0f), //4         // l_foot
+	QVector3D(-1.0f, -4.0f,  0.0f), //5         // l_toes
+	QVector3D(-1.0f, -5.0f,  0.0f), //6         // l_toes_end
+	QVector3D(1.0f, -0.0f,  0.0f),  //7 right leg
+	QVector3D(1.0f, -1.0f,  0.0f), //8
+	QVector3D(1.0f, -2.0f,  0.0f), //9
+	QVector3D(1.0f, -3.0f,  0.0f), //10
+	QVector3D(1.0f, -4.0f,  0.0f), //11
+	QVector3D(1.0f, -5.0f,  0.0f), //12
+	QVector3D(-0.0f, 1.f,  0.0f),  //13 //spine 1
+	QVector3D(-0.0f, 2.f,  0.0f),  //14 //spine 2
+	QVector3D(-0.0f, 3.f,  0.0f),  //15 //spine 3
+	QVector3D(-0.0f, 4.f,  0.0f),  //16 //spine 4 (mid)
+	QVector3D(-0.0f, 5.f,  0.0f),  //17 //neck1   (head)
+	QVector3D(-0.0f, 6.f,  0.0f),  //18 //neck2
+	QVector3D(-0.0f, 7.f,  0.0f),  //18 //head
+	QVector3D(-0.0f, 8.f,  0.0f),  //20 //head_end
+	QVector3D(-1.0f, 4.f,  0.0f),  //21 //l_clavicule (left hand)
+	QVector3D(-2.0f, 4.f,  0.0f),  //22 //l_shoulder  
+	QVector3D(-3.0f, 4.f,  0.0f),  //23 //l_elbow
+	QVector3D(-4.0f, 4.f,  0.0f),  //24 //l_hand
+	QVector3D(-5.0f, 5.f,  0.0f),  //25 //l_hand_end
+	QVector3D(1.0f, 4.f,  0.0f) ,  //26 right hand
+	QVector3D(2.0f, 4.f,  0.0f) ,  //27
+	QVector3D(3.0f, 4.f,  0.0f) ,  //28
+	QVector3D(3.0f, 5.f,  0.0f) ,  //29
+	QVector3D(4.0f, 4.f,  0.0f),   //30
+	QVector3D(5.0f, 5.f,  0.0f),   //31
 
     };
-    //VertexData vertices[] = {
-    //    
-    //    // Vertex data for face 0
-    //    {, QVector2D(0.0f, 0.0f)},  // v0
-    //    {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.0f)}, // v1
-    //    {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f, 0.5f)},  // v2
-    //    {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v3
-
-    //    // Vertex data for face 1
-    //    {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D( 0.0f, 0.5f)}, // v4
-    //    {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.33f, 0.5f)}, // v5
-    //    {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.0f, 1.0f)},  // v6
-    //    {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.33f, 1.0f)}, // v7
-
-    //    // Vertex data for face 2
-    //    {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.5f)}, // v8
-    //    {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(1.0f, 0.5f)},  // v9
-    //    {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f, 1.0f)}, // v10
-    //    {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(1.0f, 1.0f)},  // v11
-
-    //    // Vertex data for face 3
-    //    {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.0f)}, // v12
-    //    {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(1.0f, 0.0f)},  // v13
-    //    {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.66f, 0.5f)}, // v14
-    //    {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(1.0f, 0.5f)},  // v15
-
-    //    // Vertex data for face 4
-    //    {QVector3D(-1.0f, -1.0f, -1.0f), QVector2D(0.33f, 0.0f)}, // v16
-    //    {QVector3D( 1.0f, -1.0f, -1.0f), QVector2D(0.66f, 0.0f)}, // v17
-    //    {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v18
-    //    {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.66f, 0.5f)}, // v19
-
-
-    //    {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v20
-    //    {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.66f, 0.5f)}, // v21
-    //    {QVector3D(-1.0f,  1.0f, -1.0f), QVector2D(0.33f, 1.0f)}, // v22
-    //    {QVector3D( 1.0f,  1.0f, -1.0f), QVector2D(0.66f, 1.0f)}  // v23
-    //};
-
-    // Indices for drawing cube faces using triungle strips.
-    // Triangle strips can be connected by duplicating indices
-    // between the strips. If connecting strips have opposite
-    // vertex order then last index of the first strip and first
-    // index of the second strip needs to be duplicated. If
-    // connecting strips have same vertex order then only last
-    // index of the first strip needs to be duplicated.
     GLushort indices[] = {
          0, 1, 
 	 1, 2,
 	 2, 3,
  	 3, 4,
 	 4, 5,
-	 0, 6,
-	 6, 7,
+	 5, 6,
+	 0, 7,
 	 7, 8,
 	 8, 9,
-	 9,10, 
-	 0,11,
-	 11, 12,
-	 12, 13,
+	 9, 10,
+	 10,11, 
+	 11,12, 
+	 0,13,
 	 13, 14,
 	 14, 15,
 	 15, 16,
+	 14, 15,
+	 15, 16,
 	 16, 17,
-	 14, 18, 
-	 18, 19, 
-	 19, 20, 
-	 20, 21, 
-	 18, 22,
-	 22, 23,
+	 17, 18,
+	 18, 19,
+	 19, 20,
+	 16, 21, 
+	 21, 22, 
+	 22, 23, 
 	 23, 24, 
 	 24, 25, 
+	 16, 26,
+	 26, 27,
+	 27, 28, 
+	 28, 29, 
+	 29, 30, 
+	 30, 31, 
     };
 
 //! [1]
     // Transfer vertex data to VBO 0
     arrayBuf.bind();
-    arrayBuf.allocate(vertices, 25 * sizeof(QVector3D));
+    arrayBuf.allocate(vertices, 32 * sizeof(QVector3D));
 
     // Transfer index data to VBO 1
     indexBuf.bind();
-    indexBuf.allocate(indices, 50 * sizeof(GLushort));
+    indexBuf.allocate(indices, 64 * sizeof(GLushort));
 //! [1]
 }
 
@@ -179,6 +145,6 @@ void GeometryEngine::drawCubeGeometry(QOpenGLShaderProgram *program)
     //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_LINES, 25, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_LINES, 64, GL_UNSIGNED_SHORT, nullptr);
 }
 
