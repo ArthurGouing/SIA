@@ -38,12 +38,35 @@ void GeometryEngine::initCubeGeometry()
     // For cube we would need only 8 vertices but we have to
     // duplicate vertex for each face because texture coordinate
     // is different.
-    VertexData vertices[] = {
-        // Vertex data for face 0
-        {QVector3D(-1.0f, -1.0f,  1.0f), QVector2D(0.0f, 0.0f)},  // v0
-        {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D(0.33f, 0.0f)}, // v1
-        {QVector3D(-1.0f,  1.0f,  1.0f), QVector2D(0.0f, 0.5f)},  // v2
-        {QVector3D( 1.0f,  1.0f,  1.0f), QVector2D(0.33f, 0.5f)}, // v3
+    QVector3D vertices[] = {
+	QVector3D(-0.0f, -0.0f,  0.0f), // root
+	QVector3D(-1.0f, -0.0f,  0.0f), // left leg
+	QVector3D(-1.0f, -1.0f,  0.0f),
+	QVector3D(-1.0f, -2.0f,  0.0f),
+	QVector3D(-1.0f, -3.0f,  0.0f),
+	QVector3D(-1.0f, -4.0f,  0.0f),
+	QVector3D(-1.0f, -5.0f,  0.0f),
+	QVector3D(1.0f, -0.0f,  0.0f),  // right leg
+	QVector3D(1.0f, -1.0f,  0.0f),
+	QVector3D(1.0f, -2.0f,  0.0f),
+	QVector3D(1.0f, -3.0f,  0.0f),
+	QVector3D(1.0f, -4.0f,  0.0f),
+	QVector3D(1.0f, -5.0f,  0.0f),
+	//QVector3D(-0.0f, 1.f,  0.0f),  // spine
+	//QVector3D(-0.0f, 2.f,  0.0f),
+	//QVector3D(-0.0f, 3.f,  0.0f),
+	//QVector3D(-0.0f, 4.f,  0.0f),  // mid
+	//QVector3D(-0.0f, 5.f,  0.0f),  // head
+	//QVector3D(-0.0f, 6.f,  0.0f),
+	//QVector3D(-0.0f, 7.f,  0.0f),
+	//QVector3D(-1.0f, 4.f,  0.0f),  // left hand
+	//QVector3D(-2.0f, 4.f,  0.0f),  
+	//QVector3D(-3.0f, 4.f,  0.0f),  
+	//QVector3D(-4.0f, 4.f,  0.0f),  
+	//QVector3D(1.0f, 4.f,  0.0f) , // right hand
+	//QVector3D(2.0f, 4.f,  0.0f) , 
+	//QVector3D(3.0f, 4.f,  0.0f) , 
+	//QVector3D(4.0f, 4.f,  0.0f)  
 
         // Vertex data for face 1
         {QVector3D( 1.0f, -1.0f,  1.0f), QVector2D( 0.0f, 0.5f)}, // v4
@@ -84,12 +107,31 @@ void GeometryEngine::initCubeGeometry()
     // connecting strips have same vertex order then only last
     // index of the first strip needs to be duplicated.
     GLushort indices[] = {
-         0,  1,  2,  3,  3,     // Face 0 - triangle strip ( v0,  v1,  v2,  v3)
-         4,  4,  5,  6,  7,  7, // Face 1 - triangle strip ( v4,  v5,  v6,  v7)
-         8,  8,  9, 10, 11, 11, // Face 2 - triangle strip ( v8,  v9, v10, v11)
-        12, 12, 13, 14, 15, 15, // Face 3 - triangle strip (v12, v13, v14, v15)
-        16, 16, 17, 18, 19, 19, // Face 4 - triangle strip (v16, v17, v18, v19)
-        20, 20, 21, 22, 23      // Face 5 - triangle strip (v20, v21, v22, v23)
+         0, 1, 
+	 1, 2,
+	 2, 3,
+ 	 3, 4,
+	 4, 5,
+	 0, 6,
+	 6, 7,
+	 7, 8,
+	 8, 9,
+	 9,10, 
+	 0,11,
+	 11, 12,
+	 12, 13,
+	 13, 14,
+	 14, 15,
+	 15, 16,
+	 16, 17,
+	 //14, 18, 
+	 //18, 19, 
+	 //19, 20, 
+	 //20, 21, 
+	 //18, 22,
+	 //22, 23,
+	 //23, 24, 
+	 //24, 25, 
     };
 
 //! [1]
@@ -119,14 +161,14 @@ void GeometryEngine::drawCubeGeometry(QOpenGLShaderProgram *program)
     program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
 
     // Offset for texture coordinate
-    offset += sizeof(QVector3D);
+    //offset += sizeof(QVector3D);
 
     // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
-    int texcoordLocation = program->attributeLocation("a_texcoord");
-    program->enableAttributeArray(texcoordLocation);
-    program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
+    //int texcoordLocation = program->attributeLocation("a_texcoord");
+    //program->enableAttributeArray(texcoordLocation);
+    //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_LINES, 34, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_LINES, 25, GL_UNSIGNED_SHORT, nullptr);
 }
 
