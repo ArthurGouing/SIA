@@ -57,38 +57,37 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
         std::cout << i << " : " <<vertices[i][0] << ", "<< vertices[i][1] << ", "<<vertices[i][2] << ", "<< std::endl;
     }
     //std::cout << *root;
-    //print_joint(root, 0);
 
-    };
+    // Indices to create line frome verticies
     GLushort indices[] = {
-         0, 1, 
+     0, 1, 
 	 1, 2,
 	 2, 3,
  	 3, 4,
 	 4, 5,
 	 5, 6,
-	 0, 7,
+	 0, 7, // r_hip
 	 7, 8,
 	 8, 9,
 	 9, 10,
 	 10,11, 
 	 11,12, 
-	 0,13,
+	 0,13, // spline_1
 	 13, 14,
 	 14, 15,
-	 15, 16,
+	 15, 16, // head
 	 14, 15,
 	 15, 16,
 	 16, 17,
 	 17, 18,
 	 18, 19,
 	 19, 20,
-	 16, 21, 
+	 16, 21,  //l_arm
 	 21, 22, 
 	 22, 23, 
 	 23, 24, 
 	 24, 25, 
-	 16, 26,
+	 16, 26, //r_arm
 	 26, 27,
 	 27, 28, 
 	 28, 29, 
@@ -120,7 +119,7 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     	frame++;
     }
     if ((frame>root->nb_frames)&(*is_loop)) { 
-	frame = 0;
+	    frame = 0;
     }
 
     // Offset for position
@@ -138,7 +137,9 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     //int texcoordLocation = program->attributeLocation("a_texcoord");
     //program->enableAttributeArray(texcoordLocation);
     //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
+
     // Udate geometry
+    root->animate(0);
     UpdateSkeletonGeometry(frame);
 
     // Draw cube geometry using indices from VBO 1
