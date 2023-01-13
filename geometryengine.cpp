@@ -26,6 +26,10 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     // Initialize Joint
     std::string file = "walk1.bvh";
     root =  Joint::createFromFile(file);
+    if (verbose){ 
+        std::cout << "The Joint root is created : "<< std::endl;
+        print_joint(root, 0);
+    }
     frame = 0;
 
     UpdateSkeletonGeometry(frame);
@@ -40,42 +44,20 @@ GeometryEngine::~GeometryEngine()
 
 void GeometryEngine::UpdateSkeletonGeometry(int frame)
 {
-    // For cube we would need only 8 vertices but we have to
-    // duplicate vertex for each face because texture coordinate
-    // is different.
-    QVector3D vertices[] = {
-	QVector3D(-0.0f, -0.0f,  frame*0.01), //0 // root // Hips
-	QVector3D(-1.0f, -0.0f,  0.0f), //1 /       // l_hips
-	QVector3D(-1.0f, -1.0f,  0.0f), //2         // l_thig
-	QVector3D(-1.0f, -2.0f,  0.0f), //3         // l_knee
-	QVector3D(-1.0f, -3.0f,  0.0f), //4         // l_foot
-	QVector3D(-1.0f, -4.0f,  0.0f), //5         // l_toes
-	QVector3D(-1.0f, -5.0f,  0.0f), //6         // l_toes_end
-	QVector3D(1.0f, -0.0f,  0.0f),  //7 right leg
-	QVector3D(1.0f, -1.0f,  0.0f), //8
-	QVector3D(1.0f, -2.0f,  0.0f), //9
-	QVector3D(1.0f, -3.0f,  0.0f), //10
-	QVector3D(1.0f, -4.0f,  0.0f), //11
-	QVector3D(1.0f, -5.0f,  0.0f), //12
-	QVector3D(-0.0f, 1.f,  0.0f),  //13 //spine 1
-	QVector3D(-0.0f, 2.f,  0.0f),  //14 //spine 2
-	QVector3D(-0.0f, 3.f,  0.0f),  //15 //spine 3
-	QVector3D(-0.0f, 4.f,  0.0f),  //16 //spine 4 (mid)
-	QVector3D(-0.0f, 5.f,  0.0f),  //17 //neck1   (head)
-	QVector3D(-0.0f, 6.f,  0.0f),  //18 //neck2
-	QVector3D(-0.0f, 7.f,  0.0f),  //18 //head
-	QVector3D(-0.0f, 8.f,  0.0f),  //20 //head_end
-	QVector3D(-1.0f, 4.f,  0.0f),  //21 //l_clavicule (left hand)
-	QVector3D(-2.0f, 4.f,  0.0f),  //22 //l_shoulder  
-	QVector3D(-3.0f, 4.f,  0.0f),  //23 //l_elbow
-	QVector3D(-4.0f, 4.f,  0.0f),  //24 //l_hand
-	QVector3D(-5.0f, 5.f,  0.0f),  //25 //l_hand_end
-	QVector3D(1.0f, 4.f,  0.0f) ,  //26 right hand
-	QVector3D(2.0f, 4.f,  0.0f) ,  //27
-	QVector3D(3.0f, 4.f,  0.0f) ,  //28
-	QVector3D(3.0f, 5.f,  0.0f) ,  //29
-	QVector3D(4.0f, 4.f,  0.0f),   //30
-	QVector3D(5.0f, 5.f,  0.0f),   //31
+    // Create the vertices from the Joint
+    //int N = root->joint_size(); // A coder dans l'idéle
+    int N = 32; // On sait qu'il en a 31 pour ce squelette
+    QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
+    QVector3D vertices[N]; 
+    int i = 0;
+    root->ComputeVertex(vertices, Transf_Matrix, i); 
+    std::cout<< "vertices array at frame "<< frame << std::endl;
+    for (int i=0; i<N; i++)
+    {
+        std::cout << i << " : " <<vertices[i][0] << ", "<< vertices[i][1] << ", "<<vertices[i][2] << ", "<< std::endl;
+    }
+    //std::cout << *root;
+    //print_joint(root, 0);
 
     };
     GLushort indices[] = {

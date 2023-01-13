@@ -71,11 +71,65 @@ QVector4D Joint::getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransfor
             1));
 
     // Calculate the global transformation matrix from the ROOT, the global position is the last column
-    QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
+    //QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
+	
+	// Update father transformation matrix
+	fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
+	
+	// Apply transformation
+	QVector3D vertice_position(fatherGlobalTransformation.column(3));
+	//cout<<vertice_position.x()<<", "<<vertice_position.y()<<", "<<vertice_position.z()<<", "<<endl;
 
     return childGlobalTransformation.column(3);
 }
 
+void print_T_Mat(QMatrix4x4 M)
+{
+	cout<< M.row(0).x() << " " << M.row(0).y() << " " << M.row(0).z() << " " << M.row(0).w() << " " <<endl;
+	cout<< M.row(1).x() << " " << M.row(1).y() << " " << M.row(1).z() << " " << M.row(1).w() << " " <<endl;
+	cout<< M.row(2).x() << " " << M.row(2).y() << " " << M.row(2).z() << " " << M.row(2).w() << " " <<endl;
+	cout<< M.row(3).x() << " " << M.row(3).y() << " " << M.row(3).z() << " " << M.row(3).w() << " " <<endl;
+	return;
+}
+
+void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
+{
+	//if (ivert >=32) // avoid core dumped
+	//return;
+	if (verbose) cout << "vertice n°"<<ivert << endl;
+
+	//QVector3D global_pos = getGlobalPosition(T_Mat);
+	vertices[ivert] = getGlobalPosition(T_Mat); 
+	cout << "joint : " << _name << endl;
+	print_T_Mat(T_Mat);
+	
+	ivert++;
+	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
+	{
+		// Save the parent transformation in T_Mat_copy
+		float *T_Mat_values = new float[16];
+		//QMatrix4x4 T_Mat_copy;
+		T_Mat.copyDataTo(T_Mat_values); 
+		_T_Matrix =  QMatrix4x4(T_Mat_values);
+	    cout << "début compute vertex, joint : "  <<endl;
+		print_joint(this, 0);
+
+		_children[ichild]->ComputeVertex(vertices, T_Mat, ivert);
+
+	    cout << "après compute vertex " << ichild <<" "<< _name <<endl;
+	    //cout << "T Mat copy : " <<_name<< endl;
+		//print_T_Mat(_T_Matrix);
+	    //cout << "T Mat sorti children : " << endl;
+		//print_T_Mat(T_Mat);
+
+		//T_Mat = _T_Matrix;
+
+	    //cout << "nouveau T Mat : " << endl;
+		//print_T_Mat(T_Mat);
+		//cout <<endl;
+	}
+
+}
 
 void parse_channel(std::ifstream& file,
    Joint* joint){
@@ -220,13 +274,15 @@ Joint* parse_joint(std::ifstream& file,
 
 		}
 		else if ( token == "}"){
+			parsed = joint;
+			return parsed;
 			
 			
 		}
 		file >> token;
 		
 	}
-	parsed = joint ;	
+	parsed = joint; // securité mais le code n'est pas censé executer ces lignes	
 	return parsed;	
 		
 	
@@ -288,30 +344,29 @@ Joint* Joint::createFromFile(std::string fileName) {
 	ifstream inputfile(fileName.data());
 	ifstream file(fileName.data());
 	if(inputfile.good()) {
-		while(!inputfile.eof()) {
-			string buf;	
-			inputfile >> buf;
-			if (verbose) cout << "Parsing" << endl;
-			// Construire la structure de donn�es root partir du fichier
-			if( buf == kHierarchy){
-				if(inputfile.good() ){
-					inputfile >> buf;
-					if( buf == kRoot){
-						root = parse_joint(inputfile, nullptr, root);
-						parse_frames(file, root);
-					}
-					else{
-						std::cerr << "Bad structure of bvh file "<< std::endl;
-						fflush(stdout);
-					}
+		string buf;	
+		inputfile >> buf;
+		if (verbose) cout << "Parsing" << endl;
+		// Construire la structure de donn�es root partir du fichier
+		if( buf == kHierarchy){
+			if(inputfile.good() ){
+				inputfile >> buf;
+				if( buf == kRoot){
+					root = parse_joint(inputfile, nullptr, root);
+					parse_frames(file, root);
+				}
+				else{
+					std::cerr << "Bad structure of bvh file "<< std::endl;
+					fflush(stdout);
 				}
 			}
-			else{
-				std::cerr << "Bad structure of bvh file "<< std::endl;
-				fflush(stdout);
-			}
-			if (verbose) cout << "Fin du parsing" << endl << endl;
 		}
+		else{
+			std::cerr << "Bad structure of bvh file "<< std::endl;
+			fflush(stdout);
+			return root;
+		}
+		if (verbose) cout << "Fin du parsing" << endl << endl;
 		inputfile.close();
 	} else {
 		std::cerr << "Failed to load the file " << fileName.data() << std::endl;
@@ -319,7 +374,6 @@ Joint* Joint::createFromFile(std::string fileName) {
 	}
 
 	cout << "File loaded" << endl;
-
 	return root;
 }
 
@@ -358,4 +412,18 @@ void Joint::nbDofs() {
 		_children[ichild]->nbDofs();
 	}
 
+}
+
+void print_joint(Joint* j, int level)
+{
+    string space;
+	for (int k=0; k<level; k++) space += " ";
+	cout << space << j->_name << "(il a "<< j->_children.size() <<" children)" << endl;
+	for (int ichild=0; ichild<j->_children.size(); ichild++)
+	{
+		level ++;
+		print_joint(j->_children[ichild], level);
+		level --;
+	}
+	return;
 }

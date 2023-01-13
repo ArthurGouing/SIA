@@ -213,5 +213,7 @@ void MainWidget::paintGL()
 
     // Draw cube geometry
     geometries->drawSkeletonGeometry(&program);
+    //geometries->drawSkeletonGeometry(&program); 
+    close();
     
 }

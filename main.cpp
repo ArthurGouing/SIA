@@ -21,11 +21,9 @@ int main(int argc, char *argv[])
         std::string arg = app.arguments().at(1).toStdString();
         if ((arg == "-v")or(arg == "--verbose"))
         {
-            std::cout << "mode verbose" << std::endl;
             verbose = true;
         }
     }
-    else std::cout << "not verbose mode " << verbose << std::endl;
     //
 
     QSurfaceFormat format;
