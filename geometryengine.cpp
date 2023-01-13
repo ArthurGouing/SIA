@@ -46,17 +46,18 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
 {
     // Create the vertices from the Joint
     //int N = root->joint_size(); // A coder dans l'idéle
-    int N = 32; // On sait qu'il en a 31 pour ce squelette
+    int N = 31; // On sait qu'il en a 31 pour ce squelette
     QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
-    QVector3D vertices[N]; 
+    QVector3D verticies[N]; 
     int i = 0;
-    root->ComputeVertex(vertices, Transf_Matrix, i); 
-    std::cout<< "vertices array at frame "<< frame << std::endl;
-    for (int i=0; i<N; i++)
-    {
-        std::cout << i << " : " <<vertices[i][0] << ", "<< vertices[i][1] << ", "<<vertices[i][2] << ", "<< std::endl;
+    root->ComputeVertex(verticies, Transf_Matrix, i); 
+    if ((verbose)&(frame==1)) {
+    	std::cout<< "vertices array at frame "<< frame << std::endl;
+    	for (int i=0; i<N; i++)
+    	{
+    	    std::cout << i << " : " <<verticies[i][0] << ", "<< verticies[i][1] << ", "<<verticies[i][2] << ", "<< std::endl;
+    	}
     }
-    //std::cout << *root;
 
     // Indices to create line frome verticies
     GLushort indices[] = {
@@ -92,13 +93,12 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
 	 27, 28, 
 	 28, 29, 
 	 29, 30, 
-	 30, 31, 
     };
 
 //! [1]
     // Transfer vertex data to VBO 0
     arrayBuf.bind();
-    arrayBuf.allocate(vertices, 32 * sizeof(QVector3D));
+    arrayBuf.allocate(verticies, 31 * sizeof(QVector3D));
 
     // Transfer index data to VBO 1
     indexBuf.bind();
@@ -139,7 +139,7 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
 
     // Udate geometry
-    root->animate(0);
+    root->animate(frame);
     UpdateSkeletonGeometry(frame);
 
     // Draw cube geometry using indices from VBO 1

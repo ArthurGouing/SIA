@@ -8,7 +8,7 @@
 #include <cmath>
 #include <iostream>
 
-MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(80., 150., 450.), _animating(true), _looping(true)//, timer(this)
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(-0., -230., -1500.), _animating(true), _looping(true)//, timer(this)
 {
 }
 MainWidget::~MainWidget()
@@ -77,7 +77,6 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 	diff = 0.0017*diff*translation.length();
 	QVector3D move(diff.x(), -diff.y(), 0);
 	translation += move;
-        update();
 	// cf. SI code
 	
     }
@@ -91,7 +90,6 @@ void MainWidget::wheelEvent(QWheelEvent *ev)
     QPoint zoom = ev->angleDelta();
     QVector3D move(0., 0., -0.01*zoom.y());
     translation += move;
-    update();
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -181,7 +179,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 1000.0, fov = 45.0;
+    const qreal zNear = 1.0, zFar = 15000.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -212,8 +210,8 @@ void MainWidget::paintGL()
     program.setUniformValue("texture", 0);
 
     // Draw cube geometry
-    geometries->drawSkeletonGeometry(&program);
-    //geometries->drawSkeletonGeometry(&program); 
+    geometries->drawSkeletonGeometry(&program); 
+    //std::cout << translation.x() << ", " <<  translation.y() << ", " <<  translation.z() << ", " << std::endl;
     close();
     
 }

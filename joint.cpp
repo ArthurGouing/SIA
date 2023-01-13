@@ -35,25 +35,25 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
 	// Rotation transform
     switch (_rorder) {
         case roXYZ:
-		    cout << "case roXYZ" << endl;
+		    //cout << "case roXYZ" << endl;
             localTransformation.rotate((float) _curRx, 1, 0, 0);
             localTransformation.rotate((float) _curRy, 0, 1, 0);
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             break;
         case roYZX:
-		    cout << "case 2" << endl;
+		    //cout << "case 2" << endl;
             localTransformation.rotate((float) _curRy, 0, 1, 0);
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             localTransformation.rotate((float) _curRx, 1, 0, 0);
             break;
         case roZXY:
-		    cout << "case 3" << endl;
+		    //cout << "case 3" << endl;
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             localTransformation.rotate((float) _curRx, 1, 0, 0);
             localTransformation.rotate((float) _curRy, 0, 1, 0);
             break;
         case roXZY:
-		    cout << "case 4" << endl;
+		    //cout << "case 4" << endl;
             localTransformation.rotate((float) _curRx, 1, 0, 1);
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             localTransformation.rotate((float) _curRy, 0, 1, 0);
@@ -65,26 +65,16 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             break;
         case roZYX:
-		    cout << "case 6" << endl;
+		    //cout << "case 6" << endl;
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             localTransformation.rotate((float) _curRy, 0, 1, 0);
-            localTransformation.rotate((float) _curRx, 0, 0, 0);
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
             break;
         default:
-		    cout << "case default" << endl;
+		    //cout << "case default" << endl;
             break;
     }
 
-	//// Translation transform (for the 1st joint)
-	//for (int idof=0; idof < _dofs.size(); idof++)
-	//{
-	//	if ((!_dofs[idof].name.compare("Xposition"))||(!_dofs[idof].name.compare("Yposition"))||(!_dofs[idof].name.compare("Zposition"))) 
-	//	{
-	//		localTransformation.setColumn(3, QVector4D(_curTx, _curTy, _curTz, 1.)); // Normalement si'il y a que "Xposition", curTy et curTz sont nul
-	//		cout << "On a une translationi : ("  << _curTx << ")"<<endl;
-	//		break;
-	//	}
-	//}
 
     // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
     localTransformation.setColumn(3, QVector4D(
@@ -93,14 +83,11 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             (float) _offZ + _curTz,
             1));
 
-    // Calculate the global transformation matrix from the ROOT, the global position is the last column
-    //QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
-	
-	// Update father transformation matrix
-	fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
-	
-	// Apply transformation
-	QVector3D vertice_position(fatherGlobalTransformation.column(3));
+    // Update father transformation matrix
+    fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
+    
+    // Apply transformation
+    QVector3D vertice_position(fatherGlobalTransformation.column(3));
 
     return vertice_position;
 }
@@ -116,35 +103,28 @@ void print_T_Mat(QMatrix4x4 M)
 
 void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
 {
-	//if (ivert >=32) // avoid core dumped
-	//return;
-	if (verbose) cout << "vertice n°"<<ivert << endl;
-
-	//QVector3D global_pos = getGlobalPosition(T_Mat);
+	// Compute position and update T_Mat
 	vertices[ivert] = getGlobalPosition(T_Mat); 
-	cout << "joint : " << _name << endl;
-	print_T_Mat(T_Mat);
-	
+
 	ivert++;
 	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
 	{
-		// Save the parent transformation in T_Mat_copy
+	        // Save the parent transformation in T_Mat_copy
 		float *T_Mat_values = new float[16];
 		//QMatrix4x4 T_Mat_copy;
 		T_Mat.copyDataTo(T_Mat_values); 
 		_T_Matrix =  QMatrix4x4(T_Mat_values);
-	    cout << "début compute vertex, joint : "  <<endl;
-		print_joint(this, 0);
+	    //cout << "début compute vertex, joint : "<< _name  <<endl;
 
 		_children[ichild]->ComputeVertex(vertices, T_Mat, ivert);
 
-	    cout << "après compute vertex " << ichild <<" "<< _name <<endl;
+	    //cout << "après compute vertex " << ichild <<" "<< _name <<endl;
 	    //cout << "T Mat copy : " <<_name<< endl;
 		//print_T_Mat(_T_Matrix);
 	    //cout << "T Mat sorti children : " << endl;
 		//print_T_Mat(T_Mat);
 
-		//T_Mat = _T_Matrix;
+		T_Mat = _T_Matrix;
 
 	    //cout << "nouveau T Mat : " << endl;
 		//print_T_Mat(T_Mat);
