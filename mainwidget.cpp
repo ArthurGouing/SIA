@@ -8,7 +8,7 @@
 #include <cmath>
 #include <iostream>
 
-MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(0., 0., -15.), _animating(true), _looping(true)//, timer(this)
+MainWidget::MainWidget() : QOpenGLWidget(), sensitivity(1.0), translation(80., 150., 450.), _animating(true), _looping(true)//, timer(this)
 {
 }
 MainWidget::~MainWidget()
@@ -181,7 +181,7 @@ void MainWidget::resizeGL(int w, int h)
     qreal aspect = qreal(w) / qreal(h ? h : 1);
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
-    const qreal zNear = 1.0, zFar = 50.0, fov = 45.0;
+    const qreal zNear = 1.0, zFar = 1000.0, fov = 45.0;
 
     // Reset projection
     projection.setToIdentity();
@@ -213,5 +213,6 @@ void MainWidget::paintGL()
 
     // Draw cube geometry
     geometries->drawSkeletonGeometry(&program);
+    close();
     
 }

@@ -1,5 +1,7 @@
 #include "joint.h"
-#include <QtGui/QMatrix4x4>
+#include <QFile>
+#include <QString>
+#include <QDataStream>
 
 using namespace std;
 namespace {
@@ -24,65 +26,143 @@ const std::string kZrot = "Zrotation";
 
 }
 
-QVector4D Joint::getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransformation) {
+QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation) 
+{
 
     // create LOCAL 4x4 rotation matrix transformation for the Joint (Only the 3x3 upper matrix is filled)
     QMatrix4x4 localTransformation = QMatrix4x4(); // localTransformation initialized to Identity
-    switch (joint->_rorder) {
+
+	// Rotation transform
+    switch (_rorder) {
         case roXYZ:
-            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+		    cout << "case roXYZ" << endl;
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
             break;
         case roYZX:
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
-            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
+		    cout << "case 2" << endl;
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
             break;
         case roZXY:
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
-            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+		    cout << "case 3" << endl;
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
             break;
         case roXZY:
-            localTransformation.rotate((float) joint->_curRx, 1, 0, 1);
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
+		    cout << "case 4" << endl;
+            localTransformation.rotate((float) _curRx, 1, 0, 1);
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
             break;
         case roYXZ:
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
-            localTransformation.rotate((float) joint->_curRx, 1, 0, 0);
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
+		    cout << "case 5" << endl;
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
             break;
         case roZYX:
-            localTransformation.rotate((float) joint->_curRz, 0, 0, 1);
-            localTransformation.rotate((float) joint->_curRy, 0, 1, 0);
-            localTransformation.rotate((float) joint->_curRx, 0, 0, 0);
+		    cout << "case 6" << endl;
+            localTransformation.rotate((float) _curRz, 0, 0, 1);
+            localTransformation.rotate((float) _curRy, 0, 1, 0);
+            localTransformation.rotate((float) _curRx, 0, 0, 0);
             break;
         default:
+		    cout << "case default" << endl;
             break;
     }
 
+	//// Translation transform (for the 1st joint)
+	//for (int idof=0; idof < _dofs.size(); idof++)
+	//{
+	//	if ((!_dofs[idof].name.compare("Xposition"))||(!_dofs[idof].name.compare("Yposition"))||(!_dofs[idof].name.compare("Zposition"))) 
+	//	{
+	//		localTransformation.setColumn(3, QVector4D(_curTx, _curTy, _curTz, 1.)); // Normalement si'il y a que "Xposition", curTy et curTz sont nul
+	//		cout << "On a une translationi : ("  << _curTx << ")"<<endl;
+	//		break;
+	//	}
+	//}
+
     // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
     localTransformation.setColumn(3, QVector4D(
-            (float) joint->_offX,
-            (float) joint->_offY,
-            (float) joint->_offZ,
+            (float) _offX + _curTx,
+            (float) _offY + _curTy,
+            (float) _offZ + _curTz,
             1));
 
     // Calculate the global transformation matrix from the ROOT, the global position is the last column
-    QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
+    //QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
+	
+	// Update father transformation matrix
+	fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
+	
+	// Apply transformation
+	QVector3D vertice_position(fatherGlobalTransformation.column(3));
+	cout<<vertice_position.x()<<", "<<vertice_position.y()<<", "<<vertice_position.z()<<", "<<endl;
 
-    return childGlobalTransformation.column(3);
+    return vertice_position;
 }
 
+void print_T_Mat(QMatrix4x4 M)
+{
+	return;
+	cout<< M.row(0).x() << " " << M.row(0).y() << " " << M.row(0).z() << " " << M.row(0).w() << " " <<endl;
+	cout<< M.row(1).x() << " " << M.row(1).y() << " " << M.row(1).z() << " " << M.row(1).w() << " " <<endl;
+	cout<< M.row(2).x() << " " << M.row(2).y() << " " << M.row(2).z() << " " << M.row(2).w() << " " <<endl;
+	cout<< M.row(3).x() << " " << M.row(3).y() << " " << M.row(3).z() << " " << M.row(3).w() << " " <<endl;
+
+
+
+}
+
+void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
+{
+	//if (ivert >=32) // avoid core dumped
+	//return;
+	if (verbose) cout << ivert << endl;
+
+	//QVector3D global_pos = getGlobalPosition(T_Mat);
+	vertices[ivert] = getGlobalPosition(T_Mat); 
+	cout << _name << endl;
+	print_T_Mat(T_Mat);
+	
+	ivert++;
+	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
+	{
+		// Save the parent transformation in T_Mat_copy
+		float *T_Mat_values = new float[16];
+		//QMatrix4x4 T_Mat_copy;
+		T_Mat.copyDataTo(T_Mat_values); 
+		_T_Matrix =  QMatrix4x4(T_Mat_values);
+	    cout << "début compute vertex, joint : "  <<endl;
+		print_joint(this, 0);
+
+		_children[ichild]->ComputeVertex(vertices, T_Mat, ivert);
+
+	    cout << "après compute vertex " << ichild <<" "<< _name <<endl;
+	    //cout << "T Mat copy : " <<_name<< endl;
+		//print_T_Mat(_T_Matrix);
+	    //cout << "T Mat sorti children : " << endl;
+		//print_T_Mat(T_Mat);
+
+		//T_Mat = _T_Matrix;
+
+	    //cout << "nouveau T Mat : " << endl;
+		//print_T_Mat(T_Mat);
+		//cout <<endl;
+	}
+
+}
 
 void parse_channel(std::ifstream& file,
    Joint* joint){
 		int num;
 		file >> num ;
 		joint->_dofs.resize(num); 
-		std :: string token;
+		string token;
 		int i = 0;
 		while( i < num){
 			file >> token ;
@@ -253,7 +333,7 @@ void Joint::read_dof(ifstream& file, int iframe)
 void parse_frames(std::ifstream& file, Joint* root)
 {
 
-        std:string token;
+    string token;
 	file >> token;
 	// place cursor at MOTION
 	while (token != kMotion)
@@ -358,4 +438,19 @@ void Joint::nbDofs() {
 		_children[ichild]->nbDofs();
 	}
 
+}
+
+void print_joint(Joint* j, int level)
+{
+    string space;
+	for (int k=0; k<level; k++) space += " ";
+	cout << space << j->_name << "(il a "<< j->_children.size() <<" children)" << endl;
+	for (int ichild=0; ichild<j->_children.size(); ichild++)
+	{
+		cout << "  " << j->_children[ichild]->_name << endl;
+		//level ++;
+		//print_joint(j->_children[ichild], level);
+		//level --;
+	}
+	return;
 }

@@ -1,6 +1,8 @@
 #ifndef _JOINT_H_
 #define _JOINT_H_
 
+#include <iostream>
+
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -8,6 +10,7 @@
 #include <fstream>
 #include <memory>
 #include <QVector4D>
+#include <QtGui/QMatrix4x4>
 
 
 extern bool verbose;
@@ -43,11 +46,12 @@ public :
 	std::vector<Joint*> _children;	// children of the current joint
         int nb_frames;
         float frame_time;
+	QMatrix4x4 _T_Matrix;  // transformation matrix of the joint
 
 
 public :
 	// Constructor :
-	Joint() {};
+	Joint() : _T_Matrix(){};
 	// Destructor :
 	~Joint() {
 		_dofs.clear();
@@ -78,17 +82,24 @@ public :
 	// Load from file (.bvh) :	
 	static Joint* createFromFile(std::string fileName);
 	
+ 	// Compute global position
+    	QVector3D getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation);
 
+	// Compute Joint vertex in global 
+	void ComputeVertex(QVector3D (&vertices)[], QMatrix4x4 &T_Mat, int &ivert);
+
+	// Change Joint's values to the value of frame i
 	void animate(int iframe=0);
-	void init_dof(std::ifstream& input, int iframe);
 
 	// Analysis of degrees of freedom :
 	void nbDofs();
 
-    QVector4D getGlobalPosition(Joint *joint, QMatrix4x4 fatherGlobalTransformation);
 };
 Joint* parse_joint(std::ifstream& file,Joint* parent, Joint* parsed);
 void parse_channel(std::ifstream& file,Joint* joint);
+void print_T_Mat(QMatrix4x4 M);
 
+//std::ostream& operator<<(std::ostream& os, Joint &j);
+void print_joint(Joint* j, int level);
 
 #endif
