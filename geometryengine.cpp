@@ -26,6 +26,10 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     // Initialize Joint
     std::string file = "walk1.bvh";
     root =  Joint::createFromFile(file);
+    if (verbose){ 
+        std::cout << "The Joint root is created : "<< std::endl;
+        print_joint(root, 0);
+    }
     frame = 0;
 
     UpdateSkeletonGeometry(frame);
@@ -53,7 +57,7 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
         std::cout << i << " : " <<vertices[i][0] << ", "<< vertices[i][1] << ", "<<vertices[i][2] << ", "<< std::endl;
     }
     //std::cout << *root;
-    print_joint(root, 0);
+    //print_joint(root, 0);
 
     // Indices to create line frome verticies
     GLushort indices[] = {

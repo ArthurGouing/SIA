@@ -101,32 +101,29 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
 	
 	// Apply transformation
 	QVector3D vertice_position(fatherGlobalTransformation.column(3));
-	cout<<vertice_position.x()<<", "<<vertice_position.y()<<", "<<vertice_position.z()<<", "<<endl;
+	//cout<<vertice_position.x()<<", "<<vertice_position.y()<<", "<<vertice_position.z()<<", "<<endl;
 
     return vertice_position;
 }
 
 void print_T_Mat(QMatrix4x4 M)
 {
-	return;
 	cout<< M.row(0).x() << " " << M.row(0).y() << " " << M.row(0).z() << " " << M.row(0).w() << " " <<endl;
 	cout<< M.row(1).x() << " " << M.row(1).y() << " " << M.row(1).z() << " " << M.row(1).w() << " " <<endl;
 	cout<< M.row(2).x() << " " << M.row(2).y() << " " << M.row(2).z() << " " << M.row(2).w() << " " <<endl;
 	cout<< M.row(3).x() << " " << M.row(3).y() << " " << M.row(3).z() << " " << M.row(3).w() << " " <<endl;
-
-
-
+	return;
 }
 
 void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
 {
 	//if (ivert >=32) // avoid core dumped
 	//return;
-	if (verbose) cout << ivert << endl;
+	if (verbose) cout << "vertice n°"<<ivert << endl;
 
 	//QVector3D global_pos = getGlobalPosition(T_Mat);
 	vertices[ivert] = getGlobalPosition(T_Mat); 
-	cout << _name << endl;
+	cout << "joint : " << _name << endl;
 	print_T_Mat(T_Mat);
 	
 	ivert++;
@@ -300,13 +297,15 @@ Joint* parse_joint(std::ifstream& file,
 
 		}
 		else if ( token == "}"){
+			parsed = joint;
+			return parsed;
 			
 			
 		}
 		file >> token;
 		
 	}
-	parsed = joint ;	
+	parsed = joint; // securité mais le code n'est pas censé executer ces lignes	
 	return parsed;	
 		
 	
@@ -368,30 +367,29 @@ Joint* Joint::createFromFile(std::string fileName) {
 	ifstream inputfile(fileName.data());
 	ifstream file(fileName.data());
 	if(inputfile.good()) {
-		while(!inputfile.eof()) {
-			string buf;	
-			inputfile >> buf;
-			if (verbose) cout << "Parsing" << endl;
-			// Construire la structure de donn�es root partir du fichier
-			if( buf == kHierarchy){
-				if(inputfile.good() ){
-					inputfile >> buf;
-					if( buf == kRoot){
-						root = parse_joint(inputfile, nullptr, root);
-						parse_frames(file, root);
-					}
-					else{
-						std::cerr << "Bad structure of bvh file "<< std::endl;
-						fflush(stdout);
-					}
+		string buf;	
+		inputfile >> buf;
+		if (verbose) cout << "Parsing" << endl;
+		// Construire la structure de donn�es root partir du fichier
+		if( buf == kHierarchy){
+			if(inputfile.good() ){
+				inputfile >> buf;
+				if( buf == kRoot){
+					root = parse_joint(inputfile, nullptr, root);
+					parse_frames(file, root);
+				}
+				else{
+					std::cerr << "Bad structure of bvh file "<< std::endl;
+					fflush(stdout);
 				}
 			}
-			else{
-				std::cerr << "Bad structure of bvh file "<< std::endl;
-				fflush(stdout);
-			}
-			if (verbose) cout << "Fin du parsing" << endl << endl;
 		}
+		else{
+			std::cerr << "Bad structure of bvh file "<< std::endl;
+			fflush(stdout);
+			return root;
+		}
+		if (verbose) cout << "Fin du parsing" << endl << endl;
 		inputfile.close();
 	} else {
 		std::cerr << "Failed to load the file " << fileName.data() << std::endl;
@@ -399,7 +397,6 @@ Joint* Joint::createFromFile(std::string fileName) {
 	}
 
 	cout << "File loaded" << endl;
-
 	return root;
 }
 
@@ -447,10 +444,9 @@ void print_joint(Joint* j, int level)
 	cout << space << j->_name << "(il a "<< j->_children.size() <<" children)" << endl;
 	for (int ichild=0; ichild<j->_children.size(); ichild++)
 	{
-		cout << "  " << j->_children[ichild]->_name << endl;
-		//level ++;
-		//print_joint(j->_children[ichild], level);
-		//level --;
+		level ++;
+		print_joint(j->_children[ichild], level);
+		level --;
 	}
 	return;
 }

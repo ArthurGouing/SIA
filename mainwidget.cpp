@@ -212,7 +212,7 @@ void MainWidget::paintGL()
     program.setUniformValue("texture", 0);
 
     // Draw cube geometry
-    geometries->drawSkeletonGeometry(&program);
+    //geometries->drawSkeletonGeometry(&program); 
     close();
     
 }
