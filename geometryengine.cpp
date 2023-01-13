@@ -51,23 +51,13 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
     QVector3D verticies[N]; 
     int i = 0;
     root->ComputeVertex(verticies, Transf_Matrix, i); 
-    std::cout<< "vertices array at frame "<< frame << std::endl;
-    for (int i=0; i<N; i++)
-    {
-        std::cout << i << " : " <<verticies[i][0] << ", "<< verticies[i][1] << ", "<<verticies[i][2] << ", "<< std::endl;
+    if ((verbose)&(frame==1)) {
+    	std::cout<< "vertices array at frame "<< frame << std::endl;
+    	for (int i=0; i<N; i++)
+    	{
+    	    std::cout << i << " : " <<verticies[i][0] << ", "<< verticies[i][1] << ", "<<verticies[i][2] << ", "<< std::endl;
+    	}
     }
-    QVector3D v_test[] {
-        verticies[1],
-        verticies[2],
-        verticies[3],
-        verticies[4],
-        verticies[5],
-        verticies[6],
-        verticies[7],
-    };
-
-    //std::cout << *root;
-    //print_joint(root, 0);
 
     // Indices to create line frome verticies
     GLushort indices[] = {

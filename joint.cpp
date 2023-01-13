@@ -75,16 +75,6 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             break;
     }
 
-	//// Translation transform (for the 1st joint)
-	//for (int idof=0; idof < _dofs.size(); idof++)
-	//{
-	//	if ((!_dofs[idof].name.compare("Xposition"))||(!_dofs[idof].name.compare("Yposition"))||(!_dofs[idof].name.compare("Zposition"))) 
-	//	{
-	//		localTransformation.setColumn(3, QVector4D(_curTx, _curTy, _curTz, 1.)); // Normalement si'il y a que "Xposition", curTy et curTz sont nul
-	//		cout << "On a une translationi : ("  << _curTx << ")"<<endl;
-	//		break;
-	//	}
-	//}
 
     // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
     localTransformation.setColumn(3, QVector4D(
@@ -93,15 +83,11 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             (float) _offZ + _curTz,
             1));
 
-    // Calculate the global transformation matrix from the ROOT, the global position is the last column
-    //QMatrix4x4 childGlobalTransformation = fatherGlobalTransformation * localTransformation;
-	
-	// Update father transformation matrix
-	fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
-	
-	// Apply transformation
-	QVector3D vertice_position(fatherGlobalTransformation.column(3));
-	//cout<<vertice_position.x()<<", "<<vertice_position.y()<<", "<<vertice_position.z()<<", "<<endl;
+    // Update father transformation matrix
+    fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
+    
+    // Apply transformation
+    QVector3D vertice_position(fatherGlobalTransformation.column(3));
 
     return vertice_position;
 }
@@ -117,18 +103,13 @@ void print_T_Mat(QMatrix4x4 M)
 
 void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
 {
-	//if (ivert >=32) // avoid core dumped
-	//return;
-
-	//QVector3D global_pos = getGlobalPosition(T_Mat);
+	// Compute position and update T_Mat
 	vertices[ivert] = getGlobalPosition(T_Mat); 
-	if (verbose) cout << "vertice n°"<<ivert << endl;
-	if (verbose) cout << vertices[ivert].x() << ", " <<  vertices[ivert].y() << ", " <<  vertices[ivert].z() << ", " << endl;
-	
+
 	ivert++;
 	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
 	{
-		// Save the parent transformation in T_Mat_copy
+	        // Save the parent transformation in T_Mat_copy
 		float *T_Mat_values = new float[16];
 		//QMatrix4x4 T_Mat_copy;
 		T_Mat.copyDataTo(T_Mat_values); 

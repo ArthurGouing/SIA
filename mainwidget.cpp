@@ -211,7 +211,7 @@ void MainWidget::paintGL()
 
     // Draw cube geometry
     geometries->drawSkeletonGeometry(&program); 
-	std::cout << translation.x() << ", " <<  translation.y() << ", " <<  translation.z() << ", " << std::endl;
+    //std::cout << translation.x() << ", " <<  translation.y() << ", " <<  translation.z() << ", " << std::endl;
     close();
     
 }
