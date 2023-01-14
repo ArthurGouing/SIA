@@ -88,7 +88,7 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 void MainWidget::wheelEvent(QWheelEvent *ev)
 {
     QPoint zoom = ev->angleDelta();
-    QVector3D move(0., 0., -0.01*zoom.y());
+    QVector3D move(0., 0., -0.0001*zoom.y()*translation.length());
     translation += move;
 }
 

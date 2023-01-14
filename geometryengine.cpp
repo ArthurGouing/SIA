@@ -71,7 +71,7 @@ void GeometryEngine::DrawPlanGeometry(QOpenGLShaderProgram *program)
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
     float size     = 500;
-    float tex_size = 10;
+    float tex_size = 5;
 	float f_offset = 111;
 	VertexData verticies_plan[] = {
 		{QVector3D(-size, f_offset, -size), QVector2D(0., 0.)},
