@@ -4,7 +4,9 @@
 #ifndef GEOMETRYENGINE_H
 #define GEOMETRYENGINE_H
 
+#include "trimesh/include/TriMesh.h"
 #include "joint.h"
+
 
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>

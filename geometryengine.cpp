@@ -27,7 +27,8 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
 	indexBuf_plan.create();
 
     // Initialize Joint
-    std::string file = "walk1.bvh";
+    std::string file = "ressources/walk1.bvh"; // à mettre en argument de l'exe
+
     root =  Joint::createFromFile(file);
     if (verbose){ 
         std::cout << "The Joint root is created : "<< std::endl;
