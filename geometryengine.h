@@ -19,7 +19,9 @@ public:
     virtual ~GeometryEngine();
 
     float get_delta_time(){return root->frame_time;}
+
     void drawSkeletonGeometry(QOpenGLShaderProgram *program);
+	void DrawPlanGeometry(QOpenGLShaderProgram *program);
 
 private:
     void UpdateSkeletonGeometry(int iframe);
@@ -31,6 +33,9 @@ private:
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
+
+    QOpenGLBuffer arrayBuf_plan;
+    QOpenGLBuffer indexBuf_plan;
 };
 
 #endif // GEOMETRYENGINE_H

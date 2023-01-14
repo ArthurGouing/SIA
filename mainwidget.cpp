@@ -210,8 +210,11 @@ void MainWidget::paintGL()
     program.setUniformValue("texture", 0);
 
     // Draw cube geometry
+	std::cout << "Draw plan ..." << std::endl;
+	geometries->DrawPlanGeometry(&program);
+	std::cout << "Draw Skeleton ..." << std::endl;
     geometries->drawSkeletonGeometry(&program); 
-    //std::cout << translation.x() << ", " <<  translation.y() << ", " <<  translation.z() << ", " << std::endl;
+    std::cout << translation.x() << ", " <<  translation.y() << ", " <<  translation.z() << ", " << std::endl;
     close();
     
 }

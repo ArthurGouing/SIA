@@ -5,14 +5,21 @@ precision mediump float;
 #endif
 
 uniform sampler2D texture;
+uniform bool is_plan;
 
-//varying vec2 v_texcoord;
+varying vec2 v_texcoord;
 
 //! [0]
 void main()
 {
     // Set fragment color from texture
-    gl_FragColor = vec4(1., 1., 1., 1);
+	if (is_plan)
+    gl_FragColor = texture2D(texture, v_texcoord);
+	else
+	{
+		float color = .5;
+		gl_FragColor =vec4(.5, .5, 5, 0.);
+	}
 }
 //! [0]
 

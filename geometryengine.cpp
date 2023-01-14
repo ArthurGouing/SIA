@@ -10,18 +10,21 @@
 struct VertexData
 {
     QVector3D position;
-    //QVector2D texCoord;
+    QVector2D texCoord;
 };
 
 //! [0]
 GeometryEngine::GeometryEngine(bool* looping, bool* animating)
-    : indexBuf(QOpenGLBuffer::IndexBuffer), is_loop(looping), is_animated(animating)
+    : indexBuf(QOpenGLBuffer::IndexBuffer), indexBuf_plan(QOpenGLBuffer::IndexBuffer),is_loop(looping), is_animated(animating)
 {
     initializeOpenGLFunctions();
 
     // Generate 2 VBOs
     arrayBuf.create();
     indexBuf.create();
+
+	arrayBuf_plan.create();
+	indexBuf_plan.create();
 
     // Initialize Joint
     std::string file = "walk1.bvh";
@@ -39,13 +42,59 @@ GeometryEngine::~GeometryEngine()
 {
     arrayBuf.destroy();
     indexBuf.destroy();
+
+	arrayBuf_plan.destroy();
+	indexBuf_plan.destroy();
 }
 //! [0]
 
+void GeometryEngine::DrawPlanGeometry(QOpenGLShaderProgram *program)
+{
+    arrayBuf_plan.bind();
+    indexBuf_plan.bind();
+    // Offset for position
+    quintptr offset = 0;
+
+    // Tell OpenGL programmable pipeline how to locate vertex position data
+    int vertexLocation = program->attributeLocation("a_position");
+    program->enableAttributeArray(vertexLocation);
+    program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+	program->setUniformValue("is_plan", true);
+
+    // Offset for texture coordinate
+    offset += sizeof(QVector3D);
+
+    // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
+    int texcoordLocation = program->attributeLocation("a_texcoord");
+    program->enableAttributeArray(texcoordLocation);
+    program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
+
+    float size     = 500;
+    float tex_size = 10;
+	float f_offset = 111;
+	VertexData verticies_plan[] = {
+		{QVector3D(-size, f_offset, -size), QVector2D(0., 0.)},
+		{QVector3D( size, f_offset, -size), QVector2D(tex_size, 0.)},
+		{QVector3D( size, f_offset,  size), QVector2D(tex_size, tex_size)},
+		{QVector3D(-size, f_offset,  size), QVector2D(0., tex_size)}, 
+	};
+
+	GLushort index_plan[] = {0, 3, 2, 1 };
+    // Transfer vertex data to VBO 0
+    arrayBuf_plan.bind();
+    arrayBuf_plan.allocate(verticies_plan, 4 * sizeof(VertexData));
+
+    // Transfer index data to VBO 1
+    indexBuf_plan.bind();
+    indexBuf_plan.allocate(index_plan, 4 * sizeof(GLushort));
+
+    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, nullptr);
+}
+
 void GeometryEngine::UpdateSkeletonGeometry(int frame)
 {
-    // Create the vertices from the Joint
-    //int N = root->joint_size(); // A coder dans l'idéle
+	
     int N = 31; // On sait qu'il en a 31 pour ce squelette
     QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
     QVector3D verticies[N]; 
@@ -109,9 +158,6 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
 //! [2]
 void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 {
-    // Tell OpenGL which VBOs to use
-    arrayBuf.bind();
-    indexBuf.bind();
 
     // Update frame
     if ((frame <= root->nb_frames)&(*is_animated)) // faire cette attrbcut
@@ -125,11 +171,17 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     // Offset for position
     quintptr offset = 0;
 
+    // Tell OpenGL which VBOs to use
+    arrayBuf.bind();
+    indexBuf.bind();
+
     // Tell OpenGL programmable pipeline how to locate vertex position data
     int vertexLocation = program->attributeLocation("a_position");
     program->enableAttributeArray(vertexLocation);
     program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(QVector3D));
 
+	program->setUniformValue("is_plan", false);
+	
     // Offset for texture coordinate
     //offset += sizeof(QVector3D);
 
@@ -147,3 +199,4 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 
 }
 //! [2]
+
