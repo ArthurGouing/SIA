@@ -8,6 +8,7 @@
 #include "joint.h"
 
 
+#include <vector>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
@@ -23,21 +24,31 @@ public:
     float get_delta_time(){return root->frame_time;}
 
     void drawSkeletonGeometry(QOpenGLShaderProgram *program);
-	void DrawPlanGeometry(QOpenGLShaderProgram *program);
+	void drawPlanGeometry(QOpenGLShaderProgram *program);
+	void drawModelGeometry(QOpenGLShaderProgram *program);
 
 private:
-    void UpdateSkeletonGeometry(int iframe);
-
+	// Skeleton geometry
     Joint* root;
     int frame;
     bool* is_loop;
     bool* is_animated;
-
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
+    void UpdateSkeletonGeometry(int iframe);
 
+	// Ground geometry
     QOpenGLBuffer arrayBuf_plan;
     QOpenGLBuffer indexBuf_plan;
+
+	// Model geometry
+	trimesh::TriMesh*                  model;
+	std::vector<trimesh::point>*       vertices_model = nullptr;
+	std::vector<trimesh::Vec<3, int>>*  indices_model  = nullptr;
+    QOpenGLBuffer arrayBuf_model;
+    QOpenGLBuffer indexBuf_model;
+	void initModelGeometry();
+	
 };
 
 #endif // GEOMETRYENGINE_H

@@ -957,7 +957,7 @@ static bool read_verts_asc(FILE *f, TriMesh *mesh,
 				              &mesh->vertices[i][0],
 				              &mesh->vertices[i][1],
 				              &mesh->vertices[i][2]) != 3)
-					return false;
+				return false;
 				j += 2;
 			} else if (j == vert_norm) {
 				if (fscanf(f, "%f %f %f",

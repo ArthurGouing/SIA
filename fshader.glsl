@@ -17,7 +17,7 @@ void main()
     gl_FragColor = texture2D(texture, v_texcoord);
 	else
 	{
-		float c = 1.;
+		float c = 0.5;
 		gl_FragColor =vec4(c, c, c, 0.);
 	}
 }

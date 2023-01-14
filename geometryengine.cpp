@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Qt Company Ltd.
+// Copyright (C) 2016 The Qt Compaa
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #include "geometryengine.h"
@@ -26,15 +26,20 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
 	arrayBuf_plan.create();
 	indexBuf_plan.create();
 
-    // Initialize Joint
+    // Initialize Joint 
     std::string file = "ressources/walk1.bvh"; // à mettre en argument de l'exe
-
     root =  Joint::createFromFile(file);
     if (verbose){ 
         std::cout << "The Joint root is created : "<< std::endl;
         print_joint(root, 0);
     }
     frame = 0;
+	// Initialize Model
+	std::string model_name = "ressources/skin.off";
+	model = trimesh::TriMesh::read(model_name);
+
+	vertices_model = &(model->vertices);
+	indices_model  = &(model->faces);
 
     UpdateSkeletonGeometry(frame);
 }
@@ -46,10 +51,33 @@ GeometryEngine::~GeometryEngine()
 
 	arrayBuf_plan.destroy();
 	indexBuf_plan.destroy();
+
+	arrayBuf_model.destroy();
+	indexBuf_model.destroy();
 }
 //! [0]
 
-void GeometryEngine::DrawPlanGeometry(QOpenGLShaderProgram *program)
+void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
+{
+	arrayBuf_model.bind();
+	indexBuf_model.bind();
+
+	// Read model vertice to VBO
+    //arrayBuf_plan.allocate(&(model->vertices.front()), model->vertices.size() * sizeof(trimesh::point));
+    //indexBuf_plan.allocate(&(model->faces.front()), model->faces.size() * 3 * sizeof(int));
+    arrayBuf_plan.allocate(&vertices_model->front(), model->vertices.size() * sizeof(trimesh::point));
+    indexBuf_plan.allocate(&indices_model->front(), model->faces.size() * 3 * sizeof(int));
+
+    // Tell OpenGL programmable pipeline how to locate vertex position data
+    int vertexLocation = program->attributeLocation("a_position");
+    program->enableAttributeArray(vertexLocation);
+    program->setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3);
+
+    glDrawElements(GL_TRIANGLES, 2*3*model->faces.size(), GL_UNSIGNED_INT, nullptr);
+	return;
+}
+
+void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
 {
     arrayBuf_plan.bind();
     indexBuf_plan.bind();
