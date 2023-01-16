@@ -37,11 +37,13 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     // Initialize Model
     std::string model_name = "ressources/skin.off";
     model = trimesh::TriMesh::read(model_name);
+	weight_model = readWeights("ressources/weights.txt");
     
     vertices_model_init = &(model->vertices);
     vertices_model      = &(model->vertices);
     indices_model  		= &(model->faces);
 
+    
     UpdateSkeletonGeometry();
 }
 
@@ -60,6 +62,10 @@ GeometryEngine::~GeometryEngine()
 
 void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
 {
+
+	// Update geometru
+    UpdateModelGeometry();
+
 	arrayBuf_model.bind();
 	indexBuf_model.bind();
 
@@ -78,29 +84,61 @@ void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
 	return;
 }
 
-void UpdateModelGeometry()
+void GeometryEngine::UpdateModelGeometry()
 {
 	// il faut appeler la fonction aprés l'update du skeleton
 	// Compute the new position of each vertices
+	std::cout << "debut update"<< std::endl;
 	Joint* joint;
-	for (int i=0; i<vertices_model.size(); i++)
+	for (int i=0; i<vertices_model->size(); i++)
 	{
 		QMatrix4x4 T_Matrix = QMatrix4x4();
+		trimesh::Vec<3, float> vert = vertices_model->at(i);
+		QVector4D pos_init = QVector4D(vert.x, vert.y, vert.z, 1.);
+		QVector4D pos = QVector4D(0., 0., 0., 1.);
 		joint = root;
-		int k=0
+		int k=0;
 		//Compute the transform matrix
 		for (int ichild=0; ichild<joint->_children.size(); ichild++) 
 		{
 			std::cout << joint->_name << std::endl;
-			T_Matrix += weight_model[i][k] * joint->_T_Matrix;
+			std::cout << joint->_children.size() << std::endl;
+			pos +=  weight_model[i][k] * joint->_T_Matrix * pos_init;
 			k++;
-			joint = joint->_children[ichild];
+			std::cout << "ichild : " << ichild<< std::endl;
+
+			*joint = *joint->_children[ichild];
+			std::cout << joint->_name << std::endl;
 		}
-		vertices_model[i] = vertices_model_init[i] * T_Matrix;
+		vertices_model[i][0] = pos.x(); 
+		vertices_model[i][1] = pos.y(); 
+		vertices_model[i][2] = pos.z(); 
 	}
 	
 }
 
+std::vector<std::vector<float>> GeometryEngine::readWeights(std::string fileName) {
+	std::cout << "debut read"<< std::endl;
+    std::fstream file(fileName);
+    std::string line;
+	std::vector<std::vector<float>> matrix;
+	std::getline(file, line);
+    int i = 0;
+    while (std::getline(file, line)) {
+		std::cout << line << std::endl;
+        float weight;
+		std::vector<float> weight_line;
+        std::stringstream ss(line);
+        weight_model.push_back(std::vector<float>());
+        while (ss >> weight) {
+            weight_line.push_back(weight);
+        }
+		matrix.push_back(weight_line);
+		i++;
+    }
+	std::cout << "fin read"<< std::endl;
+	return matrix;
+}
 
 void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
 {
@@ -245,7 +283,7 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 
     // Udate geometry
     root->animate(frame);
-	root->reset(); // A enlever pour voir l'animation
+	//root->reset(); // A enlever pour voir l'animation
     UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1

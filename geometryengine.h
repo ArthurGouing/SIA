@@ -37,6 +37,7 @@ private:
     QOpenGLBuffer indexBuf;
     void UpdateSkeletonGeometry();
 	void UpdateModelGeometry();
+	std::vector<std::vector<float>> readWeights(std::string fileName);
 
 	// Ground geometry
     QOpenGLBuffer arrayBuf_plan;
@@ -47,7 +48,7 @@ private:
 	std::vector<trimesh::point>*        vertices_model_init = nullptr;
 	std::vector<trimesh::point>*        vertices_model = nullptr;
 	std::vector<trimesh::Vec<3, int>>*  indices_model  = nullptr;
-	std::vector<std::vector<float>>* 	weight_model;
+	std::vector<std::vector<float>> 	weight_model;
     QOpenGLBuffer arrayBuf_model;
     QOpenGLBuffer indexBuf_model;
 	void initModelGeometry();
