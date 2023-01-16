@@ -91,6 +91,9 @@ public :
 	// Change Joint's values to the value of frame i
 	void animate(int iframe=0);
 
+	// Change joint calues to initial pos
+	void reset();
+
 	// Analysis of degrees of freedom :
 	void nbDofs();
 

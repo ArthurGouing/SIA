@@ -398,6 +398,16 @@ void Joint::animate(int iframe)
 	}
 }
 
+void Joint::reset()
+{
+	//Reset dofs values
+	_curTx = 0; _curTy = 0; _curTz = 0;
+	_curRx = 0; _curRy = 0; _curRz = 0;
+	for (unsigned int ichild = 0 ; ichild < _children.size() ; ichild++) {
+		_children[ichild]->reset();
+	}
+}
+
 
 void Joint::nbDofs() {
 	if (_dofs.empty()) return;

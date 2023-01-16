@@ -35,7 +35,8 @@ private:
     bool* is_animated;
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
-    void UpdateSkeletonGeometry(int iframe);
+    void UpdateSkeletonGeometry();
+	void UpdateModelGeometry();
 
 	// Ground geometry
     QOpenGLBuffer arrayBuf_plan;
@@ -43,8 +44,10 @@ private:
 
 	// Model geometry
 	trimesh::TriMesh*                  model;
-	std::vector<trimesh::point>*       vertices_model = nullptr;
+	std::vector<trimesh::point>*        vertices_model_init = nullptr;
+	std::vector<trimesh::point>*        vertices_model = nullptr;
 	std::vector<trimesh::Vec<3, int>>*  indices_model  = nullptr;
+	std::vector<std::vector<float>>* 	weight_model;
     QOpenGLBuffer arrayBuf_model;
     QOpenGLBuffer indexBuf_model;
 	void initModelGeometry();

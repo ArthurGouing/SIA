@@ -34,14 +34,15 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
         print_joint(root, 0);
     }
     frame = 0;
-	// Initialize Model
-	std::string model_name = "ressources/skin.off";
-	model = trimesh::TriMesh::read(model_name);
+    // Initialize Model
+    std::string model_name = "ressources/skin.off";
+    model = trimesh::TriMesh::read(model_name);
+    
+    vertices_model_init = &(model->vertices);
+    vertices_model      = &(model->vertices);
+    indices_model  		= &(model->faces);
 
-	vertices_model = &(model->vertices);
-	indices_model  = &(model->faces);
-
-    UpdateSkeletonGeometry(frame);
+    UpdateSkeletonGeometry();
 }
 
 GeometryEngine::~GeometryEngine()
@@ -76,6 +77,30 @@ void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
     glDrawElements(GL_TRIANGLES, 2*3*model->faces.size(), GL_UNSIGNED_INT, nullptr);
 	return;
 }
+
+void UpdateModelGeometry()
+{
+	// il faut appeler la fonction aprés l'update du skeleton
+	// Compute the new position of each vertices
+	Joint* joint;
+	for (int i=0; i<vertices_model.size(); i++)
+	{
+		QMatrix4x4 T_Matrix = QMatrix4x4();
+		joint = root;
+		int k=0
+		//Compute the transform matrix
+		for (int ichild=0; ichild<joint->_children.size(); ichild++) 
+		{
+			std::cout << joint->_name << std::endl;
+			T_Matrix += weight_model[i][k] * joint->_T_Matrix;
+			k++;
+			joint = joint->_children[ichild];
+		}
+		vertices_model[i] = vertices_model_init[i] * T_Matrix;
+	}
+	
+}
+
 
 void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
 {
@@ -121,7 +146,7 @@ void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
     glDrawElements(GL_QUADS, 4, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void GeometryEngine::UpdateSkeletonGeometry(int frame)
+void GeometryEngine::UpdateSkeletonGeometry()
 {
 	
     int N = 31; // On sait qu'il en a 31 pour ce squelette
@@ -129,8 +154,7 @@ void GeometryEngine::UpdateSkeletonGeometry(int frame)
     QVector3D verticies[N]; 
     int i = 0;
     root->ComputeVertex(verticies, Transf_Matrix, i); 
-    if ((verbose)&(frame==1)) {
-    	std::cout<< "vertices array at frame "<< frame << std::endl;
+    if (verbose) {
     	for (int i=0; i<N; i++)
     	{
     	    std::cout << i << " : " <<verticies[i][0] << ", "<< verticies[i][1] << ", "<<verticies[i][2] << ", "<< std::endl;
@@ -221,7 +245,8 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 
     // Udate geometry
     root->animate(frame);
-    UpdateSkeletonGeometry(frame);
+	root->reset(); // A enlever pour voir l'animation
+    UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1
     glDrawElements(GL_LINES, 64, GL_UNSIGNED_SHORT, nullptr);

@@ -211,7 +211,7 @@ void MainWidget::paintGL()
 
     // Draw cube geometry
 	if (verbose) std::cout << "Draw plan ..." << std::endl;
-	geometries->drawPlanGeometry(&program);
+	//geometries->drawPlanGeometry(&program);
 	if (verbose) std::cout << "Draw Skeleton ..." << std::endl;
     geometries->drawSkeletonGeometry(&program); 
 	if (verbose) std::cout << "Draw Model ..." << std::endl;
