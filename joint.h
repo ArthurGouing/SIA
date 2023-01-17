@@ -47,6 +47,9 @@ public :
         int nb_frames;
         float frame_time;
 	QMatrix4x4 _T_Matrix;  // transformation matrix of the joint
+	QMatrix4x4 _R_Matrix;  // transformation matrix of the joint without offset of the joint
+	QVector4D _Translation;
+	QVector4D _Offset;
 
 
 public :
@@ -83,10 +86,13 @@ public :
 	static Joint* createFromFile(std::string fileName);
 	
  	// Compute global position
-    	QVector3D getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation);
+    	QVector3D getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatrix4x4 &SkinGlobalTransformation);
 
 	// Compute Joint vertex in global 
-	void ComputeVertex(QVector3D (&vertices)[], QMatrix4x4 &T_Mat, int &ivert);
+	void ComputeVertex(QVector3D (&vertices)[], QMatrix4x4 &T_Mat, QMatrix4x4 &T_Mat_Skin, int &ivert);
+
+	// Compute M0 pour le skinning
+	void Compute_offset(QMatrix4x4 &Transform);
 
 	// Change Joint's values to the value of frame i
 	void animate(int iframe=0);

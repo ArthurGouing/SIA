@@ -45,14 +45,15 @@ private:
 
 	// Model geometry
 	trimesh::TriMesh*                  model;
-	std::vector<trimesh::point>*        vertices_model_init = nullptr;
-	std::vector<trimesh::point>*        vertices_model = nullptr;
+	std::vector<trimesh::point>        vertices_model_init;
+	std::vector<trimesh::point>        vertices_model;
 	std::vector<trimesh::Vec<3, int>>*  indices_model  = nullptr;
 	std::vector<std::vector<float>> 	weight_model;
     QOpenGLBuffer arrayBuf_model;
     QOpenGLBuffer indexBuf_model;
 	void initModelGeometry();
+
+	void Compute_weight_position(QVector4D& Offset, QVector4D& Translataion, QMatrix4x4& T_Matrix, Joint* joint, int i, int& k);
 	
 };
-
 #endif // GEOMETRYENGINE_H

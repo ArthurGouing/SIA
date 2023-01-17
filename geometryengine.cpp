@@ -39,12 +39,17 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     model = trimesh::TriMesh::read(model_name);
 	weight_model = readWeights("ressources/weights.txt");
     
-    vertices_model_init = &(model->vertices);
-    vertices_model      = &(model->vertices);
+    vertices_model_init = model->vertices;
+    vertices_model      = model->vertices;
     indices_model  		= &(model->faces);
 
-    
+
+	QMatrix4x4 T;
+	root->reset();
+	root->Compute_offset(T);
+    root->animate(0); 
     UpdateSkeletonGeometry();
+    UpdateModelGeometry();
 }
 
 GeometryEngine::~GeometryEngine()
@@ -72,7 +77,7 @@ void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
 	// Read model vertice to VBO
     //arrayBuf_plan.allocate(&(model->vertices.front()), model->vertices.size() * sizeof(trimesh::point));
     //indexBuf_plan.allocate(&(model->faces.front()), model->faces.size() * 3 * sizeof(int));
-    arrayBuf_plan.allocate(&vertices_model->front(), model->vertices.size() * sizeof(trimesh::point));
+    arrayBuf_plan.allocate(&vertices_model.front(), model->vertices.size() * sizeof(trimesh::point));
     indexBuf_plan.allocate(&indices_model->front(), model->faces.size() * 3 * sizeof(int));
 
     // Tell OpenGL programmable pipeline how to locate vertex position data
@@ -80,7 +85,7 @@ void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
     program->enableAttributeArray(vertexLocation);
     program->setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3);
 
-    glDrawElements(GL_TRIANGLES, 2*3*model->faces.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_POINTS, 2*3*model->faces.size(), GL_UNSIGNED_INT, nullptr);
 	return;
 }
 
@@ -90,26 +95,35 @@ void GeometryEngine::UpdateModelGeometry()
 	// Compute the new position of each vertices
 	std::cout << "debut update"<< std::endl;
 	Joint* joint;
-	for (int i=0; i<vertices_model->size(); i++)
+	QMatrix4x4 T_Matrix;
+	QMatrix4x4 T_M0;
+	for (int i=0; i<3150/*vertices_model.size()*/; i++)
 	{
-		QMatrix4x4 T_Matrix = QMatrix4x4();
-		trimesh::Vec<3, float> vert = vertices_model->at(i);
-		QVector4D pos_init = QVector4D(vert.x, vert.y, vert.z, 1.);
-		QVector4D pos = QVector4D(0., 0., 0., 1.);
+		
+		//std::cout << "i : " << i << std::endl;
+		trimesh::Vec<3, float> vert = vertices_model_init.at(i);
+		QVector4D pos_init  = QVector4D(vert.x, vert.y, vert.z, 1.);
+		QVector4D pos       = QVector4D(0., 0., 0., 0.); 
+		//pos = pos_init + QVector4D(0, 50, 0, 0);
+		//std::cout << "initialize mat" << std::endl;
+		float zero[16] = { 0 };
+		T_Matrix = QMatrix4x4(zero);
+		T_Matrix.setColumn(3, QVector4D(0., 0., 0., 1.));
+		QVector4D Translation = QVector4D();
+		QVector4D Offset = QVector4D();
 		joint = root;
-		int k=0;
-		//Compute the transform matrix
-		for (int ichild=0; ichild<joint->_children.size(); ichild++) 
-		{
-			std::cout << joint->_name << std::endl;
-			std::cout << joint->_children.size() << std::endl;
-			pos +=  weight_model[i][k] * joint->_T_Matrix * pos_init;
-			k++;
-			std::cout << "ichild : " << ichild<< std::endl;
+		int k = 0;
 
-			*joint = *joint->_children[ichild];
-			std::cout << joint->_name << std::endl;
-		}
+		//CompT_Matrixute the transform matrix
+		Compute_weight_position(Offset, Translation, T_Matrix, joint, i, k);
+		//T_Matrix.setColumn(3, -Translation); // - Translation initiale
+		//T_Matrix.setColumn(3, QVector4D(0., 0., 0., 1.));
+		//print_T_Mat(T_Matrix);
+		//pos = pos_init - Translation;
+		pos = pos + Translation;
+		pos = T_Matrix * (pos_init - Offset);
+
+		//// Link value
 		vertices_model[i][0] = pos.x(); 
 		vertices_model[i][1] = pos.y(); 
 		vertices_model[i][2] = pos.z(); 
@@ -117,22 +131,58 @@ void GeometryEngine::UpdateModelGeometry()
 	
 }
 
+void GeometryEngine::Compute_weight_position(QVector4D& Offset, QVector4D& Translation, QMatrix4x4& T_Matrix, Joint* joint, int i, int& k)
+{
+    T_Matrix += weight_model[i][k] * joint->_T_Matrix;
+	Translation += weight_model[i][k] * joint->_T_Matrix.column(3);
+	Offset += weight_model[i][k] * joint->_Offset;
+	T_Matrix.setRow(3, QVector4D(0., 0., 0., 1.));
+	if ((weight_model[i][k] ==1)&(joint->_name == "l_hip_dup")) {
+		//std::cout << joint->_name << " weight : "<<weight_model[i][k] << std::endl;
+		//print_T_Mat(T_Matrix);
+		//std::cout << Translation.x() << " " <<  Translation.y() << " " <<  Translation.z() << " " << std::endl;
+	}
+	k++;
+
+
+	for (int ichild=0; ichild < joint->_children.size(); ichild++)
+	{
+		Compute_weight_position(Offset, Translation, T_Matrix, joint->_children[ichild], i, k);
+	}
+}
+
 std::vector<std::vector<float>> GeometryEngine::readWeights(std::string fileName) {
-	std::cout << "debut read"<< std::endl;
+	std::cout << "Reading "<< fileName <<" ..." << std::endl;
     std::fstream file(fileName);
     std::string line;
 	std::vector<std::vector<float>> matrix;
 	std::getline(file, line);
     int i = 0;
     while (std::getline(file, line)) {
-		std::cout << line << std::endl;
+		std::cout << i << std::endl;
         float weight;
+		float weight_max=0.;
+		int k_max=0;
+		int k=0;
 		std::vector<float> weight_line;
         std::stringstream ss(line);
         weight_model.push_back(std::vector<float>());
+		ss >> weight;
         while (ss >> weight) {
-            weight_line.push_back(weight);
+			std::cout << k <<" : "<<weight<<std::endl;
+		    if (weight > weight_max) { 
+				weight_max = weight;
+				k_max = k;
+			}
+			k++;
+            //weight_line.push_back(weight);
         }
+		std::cout << k_max <<" : "<<weight_max<<std::endl;
+		weight_line.resize(32);
+		weight_line[k_max] = 1;
+		for (int k=0; k<weight_line.size() ; k++){
+			std::cout << "w : " << weight_line[k] << " // "<< weight_line.size() << std::endl;
+		}
 		matrix.push_back(weight_line);
 		i++;
     }
@@ -189,9 +239,10 @@ void GeometryEngine::UpdateSkeletonGeometry()
 	
     int N = 31; // On sait qu'il en a 31 pour ce squelette
     QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
+    QMatrix4x4 _ = QMatrix4x4(); // Initialize at Identity
     QVector3D verticies[N]; 
     int i = 0;
-    root->ComputeVertex(verticies, Transf_Matrix, i); 
+    root->ComputeVertex(verticies, Transf_Matrix, _, i); 
     if (verbose) {
     	for (int i=0; i<N; i++)
     	{
@@ -282,8 +333,9 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
 
     // Udate geometry
+	root->reset(); // A enlever pour voir l'animation
+    root->animate(0);
     root->animate(frame);
-	//root->reset(); // A enlever pour voir l'animation
     UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1

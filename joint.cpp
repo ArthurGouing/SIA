@@ -26,7 +26,7 @@ const std::string kZrot = "Zrotation";
 
 }
 
-QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation) 
+QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatrix4x4 &SkinGlobalTransformation) 
 {
 
     // create LOCAL 4x4 rotation matrix transformation for the Joint (Only the 3x3 upper matrix is filled)
@@ -54,7 +54,7 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             break;
         case roXZY:
 		    //cout << "case 4" << endl;
-            localTransformation.rotate((float) _curRx, 1, 0, 1);
+            localTransformation.rotate((float) _curRx, 1, 0, 0);
             localTransformation.rotate((float) _curRz, 0, 0, 1);
             localTransformation.rotate((float) _curRy, 0, 1, 0);
             break;
@@ -75,6 +75,17 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             break;
     }
 
+    QMatrix4x4 Rotation = localTransformation;
+	if ((_name!="hips_dup")&(_name!="l_hip_dup")&(_name!="l_knee_dup")&(_name!="l_foot_dup")&(_name!="l_toes_dup")&(_name!="l_toes_End_dup")) 
+	{
+		Rotation.setToIdentity();
+		localTransformation.setToIdentity();
+	}
+    Rotation.setColumn(3, QVector4D(
+            (float) _curTx ,
+            (float) _curTy ,
+            (float) _curTz ,
+            1));
 
     // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
     localTransformation.setColumn(3, QVector4D(
@@ -84,7 +95,12 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation)
             1));
 
     // Update father transformation matrix
+	SkinGlobalTransformation = SkinGlobalTransformation * Rotation;
+	_Translation = fatherGlobalTransformation.column(3) -  QVector4D(43, 106, 421, 0);
     fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
+	//_Translation = SkinGlobalTransformation.column(3);
+	_T_Matrix = fatherGlobalTransformation;
+	_R_Matrix = SkinGlobalTransformation;
     
     // Apply transformation
     QVector3D vertice_position(fatherGlobalTransformation.column(3));
@@ -101,36 +117,41 @@ void print_T_Mat(QMatrix4x4 M)
 	return;
 }
 
-void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, int& ivert)
+void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, QMatrix4x4& T_Mat_Skin, int& ivert)
 {
 	// Compute position and update T_Mat
-	vertices[ivert] = getGlobalPosition(T_Mat); 
+	vertices[ivert] = getGlobalPosition(T_Mat, T_Mat_Skin); 
 
 	ivert++;
 	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
 	{
-	        // Save the parent transformation in T_Mat_copy
-		float *T_Mat_values = new float[16];
-		//QMatrix4x4 T_Mat_copy;
-		T_Mat.copyDataTo(T_Mat_values); 
-		_T_Matrix =  QMatrix4x4(T_Mat_values);
-	    //cout << "début compute vertex, joint : "<< _name  <<endl;
-
-		_children[ichild]->ComputeVertex(vertices, T_Mat, ivert);
-
-	    //cout << "après compute vertex " << ichild <<" "<< _name <<endl;
-	    //cout << "T Mat copy : " <<_name<< endl;
-		//print_T_Mat(_T_Matrix);
-	    //cout << "T Mat sorti children : " << endl;
-		//print_T_Mat(T_Mat);
-
+	    // Save the parent transformation in T_Mat_copy
+		_children[ichild]->ComputeVertex(vertices, T_Mat, T_Mat_Skin, ivert);
 		T_Mat = _T_Matrix;
-
-	    //cout << "nouveau T Mat : " << endl;
-		//print_T_Mat(T_Mat);
-		//cout <<endl;
+		T_Mat_Skin = _R_Matrix;
 	}
 
+}
+void Joint::Compute_offset(QMatrix4x4 &Transform)
+{
+	QMatrix4x4 localTransform = QMatrix4x4();
+    localTransform.rotate((float) _curRz, 0, 0, 1);
+    localTransform.rotate((float) _curRy, 0, 1, 0);
+    localTransform.rotate((float) _curRx, 1, 0, 0);
+    localTransform.setColumn(3, QVector4D(
+            (float) _offX,
+            (float) _offY,
+            (float) _offZ,
+            1));
+    _Offset = Transform.column(3);
+	Transform = Transform * localTransform;
+	std::cout << _Offset.x() << " " <<  _Offset.y() << " " <<  _Offset.z() << " " << std::endl;
+	for(int ichild=0; ichild < _children.size(); ichild++)
+	{
+		QMatrix4x4 Transform_copy = Transform;
+		_children[ichild]->Compute_offset(Transform);
+		Transform = Transform_copy;
+	}
 }
 
 void parse_channel(std::ifstream& file,
