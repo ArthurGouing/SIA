@@ -8,12 +8,14 @@ SOURCES += main.cpp
 SOURCES += \
     mainwidget.cpp \
     geometryengine.cpp \
+	skin.cpp \
     joint.cpp
 
 HEADERS += \
     mainwidget.h \
     geometryengine.h \
-    joint.h  \
+	skin.h  \
+    joint.h  
 
 RESOURCES += \
     shaders.qrc \

@@ -75,17 +75,10 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatr
             break;
     }
 
-    QMatrix4x4 Rotation = localTransformation;
-	if ((_name!="hips_dup")&(_name!="l_hip_dup")&(_name!="l_knee_dup")&(_name!="l_foot_dup")&(_name!="l_toes_dup")&(_name!="l_toes_End_dup")) 
-	{
-		Rotation.setToIdentity();
-		localTransformation.setToIdentity();
-	}
-    Rotation.setColumn(3, QVector4D(
-            (float) _curTx ,
-            (float) _curTy ,
-            (float) _curTz ,
-            1));
+	//if ((_name!="hips_dup")&(_name!="l_hip_dup")&(_name!="l_knee_dup")&(_name!="l_foot_dup")&(_name!="l_toes_dup")&(_name!="l_toes_End_dup")) 
+	//{
+	//	localTransformation.setToIdentity();
+	//}
 
     // Construction of the entire 4x4 LOCAL by adding the translation component on the last column
     localTransformation.setColumn(3, QVector4D(
@@ -93,16 +86,23 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatr
             (float) _offY + _curTy,
             (float) _offZ + _curTz,
             1));
+	//localTransformation.translate(QVector3D((float) _offX + _curTx,(float) _offY + _curTy,(float) _offZ + _curTz));
+	//localTransformation.translate(QVector3D((float) _curTx,(float) _curTy,(float) _curTz));
 
+
+	//QVector3D vertice_position = fatherGlobalTransformation.map(QVector3D(_offX, _offY, _offZ));
     // Update father transformation matrix
-	SkinGlobalTransformation = SkinGlobalTransformation * Rotation;
-	_Translation = fatherGlobalTransformation.column(3) -  QVector4D(43, 106, 421, 0);
     fatherGlobalTransformation = fatherGlobalTransformation * localTransformation;
 	//_Translation = SkinGlobalTransformation.column(3);
 	_T_Matrix = fatherGlobalTransformation;
 	_R_Matrix = SkinGlobalTransformation;
+
+	//cout << _name << endl;
+	//print_T_Mat(fatherGlobalTransformation);
+	//cout << fatherGlobalTransformation.column(3).x() << fatherGlobalTransformation.column(3).y() << fatherGlobalTransformation.column(3).z() << endl;
     
     // Apply transformation
+    //QVector3D vertice_position = fatherGlobalTransformation.map(QVector3D(_offX, _offY, _offZ));
     QVector3D vertice_position(fatherGlobalTransformation.column(3));
 
     return vertice_position;
