@@ -275,18 +275,16 @@ void parse_frames(std::ifstream& file, Joint* root)
 		cout << token << endl;
 	}
 	//inputfile;
-	int nb_frames =0;
-	float frame_time=0;
 	file >> token;
 	cout << token << endl;
-	file >> nb_frames;
+	file >> root->nb_frames;
 	file >> token;
 	file >> token;
-	file >> frame_time;
-	cout << endl << "There is "<< nb_frames << "frames." << endl;
-	cout << "The time of each frame is "<<frame_time<< "." << endl;
+	file >> root->frame_time;
+	cout << endl << "There is "<< root->nb_frames << "frames." << endl;
+	cout << "The time of each frame is "<< root->frame_time<< "." << endl;
 	// init _dofs
-	for (int frame=1; frame <= nb_frames; frame++) // Pour chaque ligne (ou frame)
+	for (int frame=1; frame <= root->nb_frames; frame++) // Pour chaque ligne (ou frame)
 	{
 		cout << "frame : " <<frame<<endl;
 		root->read_dof(file, frame);
@@ -297,8 +295,6 @@ void parse_frames(std::ifstream& file, Joint* root)
 
 Joint* Joint::createFromFile(std::string fileName) {
 	Joint* root = NULL;
-	int nb_frames;
-	float frame_time; 
 	cout << "Loading from " << fileName << endl;
 
 	ifstream inputfile(fileName.data());

@@ -4,6 +4,8 @@
 #ifndef GEOMETRYENGINE_H
 #define GEOMETRYENGINE_H
 
+#include "joint.h"
+
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
@@ -14,10 +16,14 @@ public:
     GeometryEngine();
     virtual ~GeometryEngine();
 
-    void drawCubeGeometry(QOpenGLShaderProgram *program);
+    void drawSkeletonGeometry(QOpenGLShaderProgram *program);
 
 private:
-    void initCubeGeometry(float size);
+    void UpdateSkeletonGeometry(int iframe);
+
+    Joint* root;
+    int frame;
+    bool is_loop;
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;

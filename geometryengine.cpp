@@ -15,7 +15,7 @@ struct VertexData
 
 //! [0]
 GeometryEngine::GeometryEngine()
-    : indexBuf(QOpenGLBuffer::IndexBuffer)
+    : indexBuf(QOpenGLBuffer::IndexBuffer), is_loop(true)
 {
     initializeOpenGLFunctions();
 
@@ -23,9 +23,12 @@ GeometryEngine::GeometryEngine()
     arrayBuf.create();
     indexBuf.create();
 
-    // Initializes cube geometry and transfers it to VBOs
-    float floor_size = 2.0f;
-    initCubeGeometry(floor_size);
+    // Initialize Joint
+    std::string file = "walk1.bvh";
+    root =  Joint::createFromFile(file);
+    frame = 0;
+
+    UpdateSkeletonGeometry(frame);
 }
 
 GeometryEngine::~GeometryEngine()
@@ -35,13 +38,13 @@ GeometryEngine::~GeometryEngine()
 }
 //! [0]
 
-void GeometryEngine::initCubeGeometry(float size)
+void GeometryEngine::UpdateSkeletonGeometry(int frame)
 {
     // For cube we would need only 8 vertices but we have to
     // duplicate vertex for each face because texture coordinate
     // is different.
     QVector3D vertices[] = {
-	QVector3D(-0.0f, -0.0f,  0.0f), //0 // root // Hips
+	QVector3D(-0.0f, -0.0f,  frame*0.01), //0 // root // Hips
 	QVector3D(-1.0f, -0.0f,  0.0f), //1 /       // l_hips
 	QVector3D(-1.0f, -1.0f,  0.0f), //2         // l_thig
 	QVector3D(-1.0f, -2.0f,  0.0f), //3         // l_knee
@@ -123,11 +126,20 @@ void GeometryEngine::initCubeGeometry(float size)
 }
 
 //! [2]
-void GeometryEngine::drawCubeGeometry(QOpenGLShaderProgram *program)
+void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 {
     // Tell OpenGL which VBOs to use
     arrayBuf.bind();
     indexBuf.bind();
+
+    // Update frame
+    if (frame <= root->nb_frames) // faire cette attrbcut
+    {
+    	frame++;
+    }
+    else if (is_loop) { 
+	frame = 0;
+    }
 
     // Offset for position
     quintptr offset = 0;
@@ -144,8 +156,11 @@ void GeometryEngine::drawCubeGeometry(QOpenGLShaderProgram *program)
     //int texcoordLocation = program->attributeLocation("a_texcoord");
     //program->enableAttributeArray(texcoordLocation);
     //program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(QVector3D));
+    // Udate geometry
+    UpdateSkeletonGeometry(frame);
 
     // Draw cube geometry using indices from VBO 1
     glDrawElements(GL_LINES, 64, GL_UNSIGNED_SHORT, nullptr);
+
 }
 //! [2]

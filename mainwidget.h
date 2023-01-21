@@ -5,6 +5,7 @@
 #define MAINWIDGET_H
 
 #include "geometryengine.h"
+#include "joint.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -44,6 +45,7 @@ private:
     QBasicTimer timer;
     QOpenGLShaderProgram program;
     GeometryEngine *geometries = nullptr;
+
 
     QOpenGLTexture *texture = nullptr;
 
