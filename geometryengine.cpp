@@ -4,6 +4,7 @@
 #include "geometryengine.h"
 
 #include <iostream>
+#include <stack>
 #include <QVector2D>
 #include <QVector3D>
 
@@ -27,7 +28,7 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
 	indexBuf_plan.create();
 
     // Initialize Joint 
-    std::string file = "ressources/walk1.bvh"; // à mettre en argument de l'exe
+    std::string file = "ressources/walk2.bvh"; // à mettre en argument de l'exe
     root =  Joint::createFromFile(file);
     if (verbose){ 
         std::cout << "The Joint root is created : "<< std::endl;
@@ -89,107 +90,6 @@ void GeometryEngine::drawModelGeometry(QOpenGLShaderProgram *program)
 	return;
 }
 
-//void GeometryEngine::UpdateModelGeometry()
-//{
-//	// il faut appeler la fonction aprés l'update du skeleton
-//	// Compute the new position of each vertices
-//	std::cout << "debut update"<< std::endl;
-//	Joint* joint;
-//	QMatrix4x4 T_Matrix;
-//	QMatrix4x4 T_M0;
-//	for (int i=0; i<3150/*vertices_model.size()*/; i++)
-//	{
-//		
-//		//std::cout << "i : " << i << std::endl;
-//		trimesh::Vec<3, float> vert = vertices_model_init.at(i);
-//		QVector4D pos_init  = QVector4D(vert.x, vert.y, vert.z, 1.);
-//		QVector4D pos       = QVector4D(0., 0., 0., 0.); 
-//		//pos = pos_init + QVector4D(0, 50, 0, 0);
-//		//std::cout << "initialize mat" << std::endl;
-//		float zero[16] = { 0 };
-//		T_Matrix = QMatrix4x4(zero);
-//		T_Matrix.setColumn(3, QVector4D(0., 0., 0., 1.));
-//		QVector4D Translation = QVector4D();
-//		QVector4D Offset = QVector4D();
-//		joint = root;
-//		int k = 0;
-//
-//		//CompT_Matrixute the transform matrix
-//		Compute_weight_position(Offset, Translation, T_Matrix, joint, i, k);
-//		//T_Matrix.setColumn(3, -Translation); // - Translation initiale
-//		//T_Matrix.setColumn(3, QVector4D(0., 0., 0., 1.));
-//		//print_T_Mat(T_Matrix);
-//		//pos = pos_init - Translation;
-//		pos = pos + Translation;
-//		pos = T_Matrix * (pos_init - Offset);
-//
-//		//// Link value
-//		vertices_model[i][0] = pos.x(); 
-//		vertices_model[i][1] = pos.y(); 
-//		vertices_model[i][2] = pos.z(); 
-//	}
-//	
-//}
-
-//void GeometryEngine::Compute_weight_position(QVector4D& Offset, QVector4D& Translation, QMatrix4x4& T_Matrix, Joint* joint, int i, int& k)
-//{
-//    T_Matrix += weight_model[i][k] * joint->_T_Matrix;
-//	Translation += weight_model[i][k] * joint->_T_Matrix.column(3);
-//	Offset += weight_model[i][k] * joint->_Offset;
-//	T_Matrix.setRow(3, QVector4D(0., 0., 0., 1.));
-//	if ((weight_model[i][k] ==1)&(joint->_name == "l_hip_dup")) {
-//		//std::cout << joint->_name << " weight : "<<weight_model[i][k] << std::endl;
-//		//print_T_Mat(T_Matrix);
-//		//std::cout << Translation.x() << " " <<  Translation.y() << " " <<  Translation.z() << " " << std::endl;
-//	}
-//	k++;
-//
-//
-//	for (int ichild=0; ichild < joint->_children.size(); ichild++)
-//	{
-//		Compute_weight_position(Offset, Translation, T_Matrix, joint->_children[ichild], i, k);
-//	}
-//}
-//
-//std::vector<std::vector<float>> GeometryEngine::readWeights(std::string fileName) {
-//	std::cout << "Reading "<< fileName <<" ..." << std::endl;
-//    std::fstream file(fileName);
-//    std::string line;
-//	std::vector<std::vector<float>> matrix;
-//	std::getline(file, line);
-//    int i = 0;
-//    while (std::getline(file, line)) {
-//		std::cout << i << std::endl;
-//        float weight;
-//		float weight_max=0.;
-//		int k_max=0;
-//		int k=0;
-//		std::vector<float> weight_line;
-//        std::stringstream ss(line);
-//        weight_model.push_back(std::vector<float>());
-//		ss >> weight;
-//        while (ss >> weight) {
-//			std::cout << k <<" : "<<weight<<std::endl;
-//		    if (weight > weight_max) { 
-//				weight_max = weight;
-//				k_max = k;
-//			}
-//			k++;
-//            //weight_line.push_back(weight);
-//        }
-//		std::cout << k_max <<" : "<<weight_max<<std::endl;
-//		weight_line.resize(32);
-//		weight_line[k_max] = 1;
-//		for (int k=0; k<weight_line.size() ; k++){
-//			std::cout << "w : " << weight_line[k] << " // "<< weight_line.size() << std::endl;
-//		}
-//		matrix.push_back(weight_line);
-//		i++;
-//    }
-//	std::cout << "fin read"<< std::endl;
-//	return matrix;
-//}
-
 void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
 {
     arrayBuf_plan.bind();
@@ -241,6 +141,8 @@ void GeometryEngine::UpdateSkeletonGeometry()
     QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
     QMatrix4x4 _ = QMatrix4x4(); // Initialize at Identity
     QVector3D verticies[N]; 
+	GLushort  indices  [2*(N-1)];
+	std::stack<int> index;
     int i = 0;
     root->ComputeVertex(verticies, Transf_Matrix, _, i); 
     if (verbose) {
@@ -251,52 +153,42 @@ void GeometryEngine::UpdateSkeletonGeometry()
     }
 
     // Indices to create line frome verticies
-    GLushort indices[] = {
-     0, 1, 
-	 1, 2,
-	 2, 3,
- 	 3, 4,
-	 4, 5,
-	 5, 6,
-	 0, 7, // r_hip
-	 7, 8,
-	 8, 9,
-	 9, 10,
-	 10,11, 
-	 11,12, 
-	 0,13, // spline_1
-	 13, 14,
-	 14, 15,
-	 15, 16, // head
-	 14, 15,
-	 15, 16,
-	 16, 17,
-	 17, 18,
-	 18, 19,
-	 19, 20,
-	 16, 21,  //l_arm
-	 21, 22, 
-	 22, 23, 
-	 23, 24, 
-	 24, 25, 
-	 16, 26, //r_arm
-	 26, 27,
-	 27, 28, 
-	 28, 29, 
-	 29, 30, 
-    };
-
+	i=0;
+    ComputeIndice(indices, root, i, index);
+	if (verbose) {
+		std::cout << "Indice of skeleton : " << std::endl;
+		for (int i=0; i<2*(N-1); i+=2)
+		{
+			std::cout << i/2 << " : " << indices[i] <<", "<< indices[i+1] << std::endl;
+		}
+	}
 //! [1]
     // Transfer vertex data to VBO 0
     arrayBuf.bind();
-    arrayBuf.allocate(verticies, 31 * sizeof(QVector3D));
+    arrayBuf.allocate(verticies, N * sizeof(QVector3D));
 
     // Transfer index data to VBO 1
     indexBuf.bind();
-    indexBuf.allocate(indices, 64 * sizeof(GLushort));
+    indexBuf.allocate(indices, 2*(N-1) * sizeof(GLushort));
 //! [1]
 }
 
+void GeometryEngine::ComputeIndice(GLushort (&indices)[], Joint* joint, int& i, std::stack<int>& index_stack)
+{
+	index_stack.push(i);
+	for (int ichild=0; ichild<joint->_children.size(); ichild++)
+	{
+		//std::cout << index_stack.top() <<", " << i+1 << std::endl;
+		indices[2*i] = index_stack.top() ; indices[2*i+1] = i+1;
+		i +=1;
+		//std::cout << joint->_name <<" a " << joint->_children.size() << " children :" << std::endl;
+		ComputeIndice(indices, joint->_children[ichild], i, index_stack);
+		//std::cout << "out !(" << joint->_name << ")" << std::endl;
+		//std::cout << index_stack.top() << std::endl;
+		index_stack.pop();
+		
+	}
+}
 //! [2]
 void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 {
@@ -334,12 +226,11 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 
     // Udate geometry
 	//root->reset(); // A enlever pour voir l'animation
-    root->animate(0);
     root->animate(frame);
     UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_LINES, 64, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_LINES, 62, GL_UNSIGNED_SHORT, nullptr);
 
 }
 //! [2]

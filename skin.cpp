@@ -58,9 +58,6 @@ void Skin::Update_vertices(int frame)
 	QVector4D vert_init;
 	QVector4D vert;
 
- 	// Variable de débugage
-	bool is_first = true;
-
 	for(int i=0; i<vertices.size(); i++)
 	{
 		vert = QVector4D(0., 0., 0., 1.0);
@@ -69,14 +66,6 @@ void Skin::Update_vertices(int frame)
 		for(int k=0; k<_Mi.size(); k++)
 		{
 			vert += weights[i][k] * _Mi[k] * _M0_1[k] * vert_init;
-			if ((weights[i][k] == 1)&(is_first)) { // Un vertice qui est dans le repère de l_kee
-				cout << "vertex_init = "<<vert_init.x()<<" "<<vert_init.y()<<" "<<vert_init.z()<<" "<<endl;
-				cout << "Matrice Mi : " << endl;
-				print_T_Mat(_Mi[k]);
-				is_first = false;
-				cout << "Matrice M0_1 : " << endl;
-				print_T_Mat(_M0_1[k]);
-			}
 		}
 		vertices[i][0] = vert.x();
 		vertices[i][1] = vert.y();
@@ -116,12 +105,6 @@ void Skin::Update_M(int frame)
 
 	// Fonction récursive
 	set_rec_Mi(joint, k);
-	
-	for(int k=0; k<_M0_1.size(); k++)
-	{
-		cout << "k : " << k << endl;
-		print_T_Mat(_M0_1[k]);
-	}
 }
 
 void Skin::set_rec_Mi(Joint* joint, int& k)

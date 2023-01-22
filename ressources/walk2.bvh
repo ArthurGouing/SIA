@@ -1,7 +1,7 @@
 HIERARCHY
 ROOT hips_dup
 {
-	OFFSET 13.555223 105.612480 -256.467346
+	OFFSET 0.000 0.000 0.000
 	CHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation
 	JOINT l_hip_dup
 	{

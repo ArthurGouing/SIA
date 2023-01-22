@@ -9,6 +9,7 @@
 #include "skin.h"
 
 
+#include <stack>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
@@ -49,6 +50,7 @@ private:
     QOpenGLBuffer     arrayBuf_model;
     QOpenGLBuffer     indexBuf_model;
 
+	void ComputeIndice(GLushort (&indices)[], Joint* joint, int& i, std::stack<int>& index_stack);
 	void Compute_weight_position(QVector4D& Offset, QVector4D& Translataion, QMatrix4x4& T_Matrix, Joint* joint, int i, int& k);
 	
 };
