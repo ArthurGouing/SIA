@@ -1,0 +1,5 @@
+1 - thorax - AB0
+2 - bras - ACA
+3 - avant-bras - F0C
+4 - main - 506
+5 - reference - AA9

@@ -9,13 +9,15 @@ SOURCES += \
     mainwidget.cpp \
     geometryengine.cpp \
 	skin.cpp \
-    joint.cpp
+    joint.cpp \
+	bvh_writer.cpp
 
 HEADERS += \
     mainwidget.h \
     geometryengine.h \
 	skin.h  \
-    joint.h  
+    joint.h  \
+	bvh_wirter.h \
 
 RESOURCES += \
     shaders.qrc \

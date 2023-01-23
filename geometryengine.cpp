@@ -41,7 +41,6 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     root->reset(); 
     UpdateSkeletonGeometry();
 
-	print_T_Mat(root->_T_Matrix);
 	model_skin = new Skin(model, root);
     
 	root->animate(0);
@@ -227,6 +226,7 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
     // Udate geometry
 	//root->reset(); // A enlever pour voir l'animation
     root->animate(frame);
+    root->reset();
     UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1

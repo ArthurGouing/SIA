@@ -12,8 +12,6 @@ _root(root)
 	ReadWeights("ressources/weights.txt");
 	Init_M0();
 	_Mi.resize(_M0_1.size());
-	print_T_Mat(_root->_T_Matrix);
-
 }
 
 void Skin::ReadWeights(std::string fileName, bool hard_mode)
