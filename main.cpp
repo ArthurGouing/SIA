@@ -25,13 +25,12 @@ int main(int argc, char *argv[])
             verbose = true;
         }
     }
-    //
 	std::vector<std::string> files;
 	files.push_back("mouhcine-sia-xsens-data/MT_012005BA-000-000_00B47AB0.txt");
 	files.push_back("mouhcine-sia-xsens-data/MT_012005BA-000-000_00B47ACA.txt");
 	files.push_back("mouhcine-sia-xsens-data/MT_012005BA-000-000_00B47F0C.txt");
 	files.push_back("mouhcine-sia-xsens-data/MT_012005BA-000-000_00B48506.txt");
-	write_bvh( files, "test");
+	//write_bvh( files, "ressources/xsens.bvh");
 
     QSurfaceFormat format;
     format.setDepthBufferSize(24);

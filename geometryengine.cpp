@@ -28,7 +28,7 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
 	indexBuf_plan.create();
 
     // Initialize Joint 
-    std::string file = "ressources/walk2.bvh"; // à mettre en argument de l'exe
+    std::string file = "ressources/xsens.bvh"; // à mettre en argument de l'exe
     root =  Joint::createFromFile(file);
     if (verbose){ 
         std::cout << "The Joint root is created : "<< std::endl;
@@ -113,7 +113,7 @@ void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
 
     float size     = 500;
     float tex_size = 5;
-	float f_offset = 0;
+	float f_offset = -108;
 	VertexData verticies_plan[] = {
 		{QVector3D(-size, f_offset, -size), QVector2D(0., 0.)},
 		{QVector3D( size, f_offset, -size), QVector2D(tex_size, 0.)},
@@ -225,8 +225,9 @@ void GeometryEngine::drawSkeletonGeometry(QOpenGLShaderProgram *program)
 
     // Udate geometry
 	//root->reset(); // A enlever pour voir l'animation
-    root->animate(frame);
     root->reset();
+    root->animate(frame);
+	std::cout << frame << std::endl;
     UpdateSkeletonGeometry();
 
     // Draw cube geometry using indices from VBO 1
