@@ -15,6 +15,7 @@
 #include <QOpenGLBuffer>
 
 extern bool verbose;
+extern std::string bvh_name;
 
 class GeometryEngine : protected QOpenGLFunctions
 {

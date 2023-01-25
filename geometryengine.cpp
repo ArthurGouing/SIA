@@ -28,7 +28,7 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
 	indexBuf_plan.create();
 
     // Initialize Joint 
-    std::string file = "ressources/xsens.bvh"; // à mettre en argument de l'exe
+    std::string file = bvh_name; // à mettre en argument de l'exe
     root =  Joint::createFromFile(file);
     if (verbose){ 
         std::cout << "The Joint root is created : "<< std::endl;
@@ -114,6 +114,7 @@ void GeometryEngine::drawPlanGeometry(QOpenGLShaderProgram *program)
     float size     = 500;
     float tex_size = 5;
 	float f_offset = -108;
+	if (bvh_name != "ressources/xsens.bvh") f_offset = 0;
 	VertexData verticies_plan[] = {
 		{QVector3D(-size, f_offset, -size), QVector2D(0., 0.)},
 		{QVector3D( size, f_offset, -size), QVector2D(tex_size, 0.)},
