@@ -16,7 +16,7 @@ struct VertexData
 
 //! [0]
 GeometryEngine::GeometryEngine(bool* looping, bool* animating)
-    : indexBuf(QOpenGLBuffer::IndexBuffer), indexBuf_plan(QOpenGLBuffer::IndexBuffer),is_loop(looping), is_animated(animating), frame(0)
+    : frame(0), is_loop(looping), is_animated(animating), indexBuf(QOpenGLBuffer::IndexBuffer), indexBuf_plan(QOpenGLBuffer::IndexBuffer)
 {
     initializeOpenGLFunctions();
 

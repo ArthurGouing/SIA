@@ -1,4 +1,4 @@
-QT += core gui widgets opengl 
+QT += core gui widgets openglwidgets
 
 TARGET = run
 TEMPLATE = app
@@ -8,16 +8,16 @@ SOURCES += main.cpp
 SOURCES += \
     mainwidget.cpp \
     geometryengine.cpp \
-	skin.cpp \
+    skin.cpp \
     joint.cpp \
-	bvh_writer.cpp
+    bvh_writer.cpp
 
 HEADERS += \
     mainwidget.h \
     geometryengine.h \
-	skin.h  \
+    skin.h  \
     joint.h  \
-	bvh_wirter.h \
+    bvh_wirter.h 
 
 RESOURCES += \
     shaders.qrc \
