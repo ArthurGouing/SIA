@@ -40,12 +40,18 @@ GeometryEngine::GeometryEngine(bool* looping, bool* animating)
     model = trimesh::TriMesh::read(model_name);
     root->reset(); 
     UpdateSkeletonGeometry();
+    std::cout<< "Fin Updat Skel Geo"<<std::endl;
 
+    std::cout<< "animate0"<<std::endl;
 	model_skin = new Skin(model, root);
     
+    std::cout<< "animate0"<<std::endl;
 	root->animate(0);
+    std::cout<< "animate0"<<std::endl;
     UpdateSkeletonGeometry();
+    std::cout<< "animate0"<<std::endl;
 	model_skin->Update_M(0);
+    std::cout<< "animate0"<<std::endl;
 	model_skin->Update_vertices(0);
     //UpdateModelGeometry();
 }
@@ -140,11 +146,13 @@ void GeometryEngine::UpdateSkeletonGeometry()
     int N = 31; // On sait qu'il en a 31 pour ce squelette
     QMatrix4x4 Transf_Matrix = QMatrix4x4(); // Initialize at Identity
     QMatrix4x4 _ = QMatrix4x4(); // Initialize at Identity
-    QVector3D verticies[N]; 
-	GLushort  indices  [2*(N-1)];
+    QVector3D verticies[N];
+    GLushort indices[2 * (N-1)];
 	std::stack<int> index;
     int i = 0;
-    root->ComputeVertex(verticies, Transf_Matrix, _, i); 
+    std::cout << "av" << std::endl;
+    root->ComputeVertex(verticies, Transf_Matrix, _, i, N); 
+    std::cout << "ap" << std::endl;
     if (verbose) {
     	for (int i=0; i<N; i++)
     	{
@@ -154,7 +162,7 @@ void GeometryEngine::UpdateSkeletonGeometry()
 
     // Indices to create line frome verticies
 	i=0;
-    ComputeIndice(indices, root, i, index);
+    ComputeIndice(indices, root, i, index, N);
 	if (verbose) {
 		std::cout << "Indice of skeleton : " << std::endl;
 		for (int i=0; i<2*(N-1); i+=2)
@@ -173,16 +181,18 @@ void GeometryEngine::UpdateSkeletonGeometry()
 //! [1]
 }
 
-void GeometryEngine::ComputeIndice(GLushort (&indices)[], Joint* joint, int& i, std::stack<int>& index_stack)
+void GeometryEngine::ComputeIndice(GLushort indices[], Joint* joint, int& i, std::stack<int>& index_stack, int N)
 {
+    // Allocate indices
+    // if (i == 0) {GLushort* indices = new GLushort[2 * (N-1)];}
 	index_stack.push(i);
 	for (int ichild=0; ichild<joint->_children.size(); ichild++)
 	{
 		//std::cout << index_stack.top() <<", " << i+1 << std::endl;
-		indices[2*i] = index_stack.top() ; indices[2*i+1] = i+1;
+		indices[2*i] = index_stack.top() ; indices[2*i+1] = i+1;    
 		i +=1;
 		//std::cout << joint->_name <<" a " << joint->_children.size() << " children :" << std::endl;
-		ComputeIndice(indices, joint->_children[ichild], i, index_stack);
+		ComputeIndice(indices, joint->_children[ichild], i, index_stack, N);
 		//std::cout << "out !(" << joint->_name << ")" << std::endl;
 		//std::cout << index_stack.top() << std::endl;
 		index_stack.pop();

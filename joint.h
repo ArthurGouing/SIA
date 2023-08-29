@@ -89,7 +89,7 @@ public :
     	QVector3D getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatrix4x4 &SkinGlobalTransformation);
 
 	// Compute Joint vertex in global 
-	void ComputeVertex(QVector3D (&vertices)[], QMatrix4x4 &T_Mat, QMatrix4x4 &T_Mat_Skin, int &ivert);
+	void ComputeVertex(QVector3D vertices[], QMatrix4x4 &T_Mat, QMatrix4x4 &T_Mat_Skin, int &ivert, int N);
 
 	// Compute M0 pour le skinning
 	void Compute_offset(QMatrix4x4 &Transform);

@@ -105,6 +105,8 @@ QVector3D Joint::getGlobalPosition(QMatrix4x4 &fatherGlobalTransformation, QMatr
     //QVector3D vertice_position = fatherGlobalTransformation.map(QVector3D(_offX, _offY, _offZ));
     QVector3D vertice_position(fatherGlobalTransformation.column(3));
 
+    cout << "End Global position$"<<endl;
+    cout << vertice_position.x()<<", " <<vertice_position.y() <<", "<< vertice_position.z() <<endl;
     return vertice_position;
 }
 
@@ -117,16 +119,34 @@ void print_T_Mat(QMatrix4x4 M)
 	return;
 }
 
-void Joint::ComputeVertex(QVector3D (&vertices)[], QMatrix4x4& T_Mat, QMatrix4x4& T_Mat_Skin, int& ivert)
+void Joint::ComputeVertex(QVector3D vertices[], QMatrix4x4& T_Mat, QMatrix4x4& T_Mat_Skin, int& ivert, int N)
 {
+	// // Allocate vertices
+	// if (ivert==0) {
+	// 	cout << "size vertices: " << sizeof(vertices) << endl;
+	// 	QVector3D* vertices[N];// = new QVector3D[31];
+	// 	cout << "size reallocated vertices: " << sizeof(vertices) << endl;
+	// 	cout << "size QVector3D: " << sizeof(*(vertices[0]+1)) << endl;
+	// }
+	// for (int i = 0; i < N; ++i)
+	// {
+	// 	QVector3D a = QVector3D(1, 1, 1);
+	// 	cout << a.x() << endl;
+	// 	vertices[i] = a;
+	// 	cout << i << endl;
+	// 	cout << vertices[i].x() << endl << endl;
+	// }
+
 	// Compute position and update T_Mat
-	vertices[ivert] = getGlobalPosition(T_Mat, T_Mat_Skin); 
+	std::cout<<"before get Global"<<std::endl;
+	vertices[ivert] = getGlobalPosition(T_Mat, T_Mat_Skin); //Don't work cause "vertice" is a pointer know
+	std::cout<<"after get Global"<<std::endl;
 
 	ivert++;
 	for (unsigned int ichild=0; ichild<_children.size(); ichild++)
 	{
 	    // Save the parent transformation in T_Mat_copy
-		_children[ichild]->ComputeVertex(vertices, T_Mat, T_Mat_Skin, ivert);
+		_children[ichild]->ComputeVertex(vertices, T_Mat, T_Mat_Skin, ivert, N);
 		T_Mat = _T_Matrix;
 		T_Mat_Skin = _R_Matrix;
 	}
